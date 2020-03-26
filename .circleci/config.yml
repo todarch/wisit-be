@@ -70,7 +70,7 @@ jobs:
             echo 'export IMAGE="todarch/wisit-be:${CIRCLE_BRANCH}-${TAG_SUFFIX}"' >> $BASH_ENV
       - run:
           name: Publish Docker image with Jib
-          command: |
+          command: | # DOCKER_USER/PASS is picked up from Syste.getenv
             ./gradlew jib -x test
       - add_ssh_keys:
           fingerprints:
@@ -94,6 +94,7 @@ workflows:
           requires:
             - build
       - deploy:
+          context: todarch-global-ctx
           requires:
             - test
           filters:
