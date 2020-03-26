@@ -74,7 +74,7 @@ jobs:
             ./gradlew jib -x test
       - add_ssh_keys:
           fingerprints:
-            - "80:2d:9c:70:d7:07:3f:fc:25:8d:b1:ed:4b:cd:96:73"
+            - "3a:a8:c9:72:2b:bd:11:2c:5d:a8:44:84:1c:8c:7d:4f"
       - run:
           name: Deploy app to server via Docker
           command: |
