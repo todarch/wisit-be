@@ -1,5 +1,6 @@
 # wisit backend service
 
+- http://localhost:7010/swagger-ui.html
 
 ### docker
 
