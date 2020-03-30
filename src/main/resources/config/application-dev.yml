@@ -2,6 +2,6 @@ server:
   port: 7010
 spring:
   datasource:
-    url: "jdbc:postgresql://localhost:5445/admin"
+    url: "${JDBC_DATABASE_URL:jdbc:postgresql://localhost:5445/admin}"
     username: "admin"
     password: "admin"

@@ -46,10 +46,19 @@ test {
 
 jib {
   to {
-    image = System.getenv('IMAGE') ?: 'todarch/wisit-be'
+    image = System.getenv('IMAGE') ?: 'todarch/wisit-be:latest'
     auth {
       username = System.getenv('TD_DOCKER_USER')
       password = System.getenv('TD_DOCKER_PASSWORD')
     }
+  }
+  container {
+    environment = [
+      'IMAGE': System.getenv('IMAGE') ?: 'local-build',
+      'WORKFLOW_ID': System.getenv('CIRCLE_WORKFLOW_ID') ?: 'local-build',
+      'COMMIT_USER': System.getenv('CIRCLE_PROJECT_USERNAME') ?: 'local-build',
+      'COMMIT_REPO': System.getenv('CIRCLE_PROJECT_REPONAME') ?: 'local-build',
+      'COMMIT_HASH': System.getenv('CIRCLE_SHA1') ?: 'local-build'
+    ]
   }
 }

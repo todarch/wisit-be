@@ -16,3 +16,10 @@ spring:
   flyway:
     schemas: wisit
 
+info:
+  app:
+    build:
+      registry: "https://hub.docker.com/r/todarch/wisit-be/tags"
+      image: "${IMAGE}"
+      pipeline: "https://circleci.com/workflow-run/${WORKFLOW_ID}"
+      repo: "https://github.com/${COMMIT_USER}/${COMMIT_REPO}/commit/${COMMIT_HASH}"
