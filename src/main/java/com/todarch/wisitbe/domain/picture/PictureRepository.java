@@ -22,6 +22,11 @@ public class PictureRepository {
     istanbul.setUrl("https://farm9.staticflickr.com/8667/15491990730_83ce51863a_b.jpg");
     istanbul.setCityId(2L);
     pictures.add(istanbul);
+
+    Picture brussels = new Picture();
+    brussels.setUrl("https://live.staticflickr.com/2434/3800800292_867dcce9e0_c.jpg");
+    brussels.setCityId(6L);
+    pictures.add(brussels);
   }
 
   public List<Picture> findAll() {
