@@ -1,0 +1,7 @@
+ALTER TABLE continents ADD PRIMARY KEY (id);
+
+ALTER TABLE countries ADD PRIMARY KEY (id);
+
+ALTER TABLE cities ADD PRIMARY KEY (id);
+
+ALTER TABLE pictures ADD PRIMARY KEY (id);
