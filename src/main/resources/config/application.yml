@@ -23,3 +23,7 @@ info:
       image: "${IMAGE}"
       pipeline: "https://circleci.com/workflow-run/${WORKFLOW_ID}"
       repo: "https://github.com/${COMMIT_USER}/${COMMIT_REPO}/commit/${COMMIT_HASH}"
+
+wisit:
+  internal-header-name: "${INTERNAL_HEADER_NAME}"
+  internal-header-value: "${INTERNAL_HEADER_VALUE}"
