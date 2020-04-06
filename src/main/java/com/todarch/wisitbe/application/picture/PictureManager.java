@@ -1,6 +1,6 @@
 package com.todarch.wisitbe.application.picture;
 
-import com.todarch.wisitbe.domain.fix.CityRepository;
+import com.todarch.wisitbe.application.staticdata.StaticDataManager;
 import com.todarch.wisitbe.domain.picture.Picture;
 import com.todarch.wisitbe.domain.picture.PictureRepository;
 import com.todarch.wisitbe.rest.picture.PictureResource;
@@ -16,7 +16,7 @@ public class PictureManager {
 
   private final PictureRepository pictureRepository;
 
-  private final CityRepository cityRepository;
+  private final StaticDataManager staticDataManager;
 
   public Picture next() {
     List<Picture> all = pictureRepository.findAll();
@@ -26,17 +26,8 @@ public class PictureManager {
   public Picture newPicture(PictureResource.NewPictureReq picture) {
     Picture newPic = new Picture();
     newPic.setUrl(picture.getUrl());
-    newPic.setCityId(findCityId(picture.getCity()));
+    newPic.setCityId(staticDataManager.tryToFindCityId(picture.getCity()));
     return pictureRepository.save(newPic);
-  }
-
-  private Long findCityId(String givenCity) {
-    return cityRepository.findAll()
-        .stream()
-        .filter(city -> city.getName().equalsIgnoreCase(givenCity))
-        .findFirst()
-        .orElseThrow(() -> new RuntimeException("Not-existing city in system: " + givenCity))
-        .getId();
   }
 
   public Optional<Picture> getById(long id) {

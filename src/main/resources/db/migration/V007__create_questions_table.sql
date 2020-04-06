@@ -1,0 +1,8 @@
+CREATE TABLE questions (
+    id VARCHAR(36) NOT NULL PRIMARY KEY,
+    pic_id INT NOT NULL UNIQUE,
+    city_id1 INT NOT NULL,
+    city_id2 INT NOT NULL,
+    city_id3 INT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);

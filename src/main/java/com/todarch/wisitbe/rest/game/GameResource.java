@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/questions")
 @AllArgsConstructor
-public class QuestionResource {
+public class GameResource {
 
   private QuestionManager questionManager;
 
