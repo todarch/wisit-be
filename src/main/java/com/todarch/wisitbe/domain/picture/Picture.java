@@ -5,11 +5,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import lombok.Getter;
+import lombok.Data;
 
 @Table(name = "pictures")
 @Entity
-@Getter
+@Data
 public class Picture {
 
   @Id
@@ -19,4 +19,8 @@ public class Picture {
   private String url;
 
   private long cityId;
+
+  public boolean isFrom(long answerCityId) {
+    return cityId == answerCityId;
+  }
 }
