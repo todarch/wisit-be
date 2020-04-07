@@ -5,6 +5,7 @@ import com.todarch.wisitbe.application.staticdata.StaticDataManager;
 import com.todarch.wisitbe.domain.fix.City;
 import com.todarch.wisitbe.domain.fix.CityRepository;
 import com.todarch.wisitbe.domain.picture.Picture;
+import com.todarch.wisitbe.domain.picture.PictureRepository;
 import com.todarch.wisitbe.domain.question.Question;
 import com.todarch.wisitbe.domain.question.QuestionRepository;
 import com.todarch.wisitbe.domain.question.UserQuestion;
@@ -44,6 +45,8 @@ public class QuestionManager {
   private final StaticDataManager staticDataManager;
 
   private final PictureManager pictureManager;
+
+  private final PictureRepository pictureRepository;
 
   private final WisitEventPublisher wisitEventPublisher;
 
@@ -92,10 +95,14 @@ public class QuestionManager {
     Objects.requireNonNull(newQuestionReq.getPicUrl(), "picurl cannot be null");
     Objects.requireNonNull(newQuestionReq.getCityName(), "city cannot be null");
 
-    NewPictureReq newPictureReq = new NewPictureReq();
-    newPictureReq.setPicUrl(newQuestionReq.getPicUrl());
-    newPictureReq.setCityName(newQuestionReq.getCityName());
-    Picture savedPicture = pictureManager.newPicture(newPictureReq);
+    Picture savedPicture =
+        pictureRepository.findByUrl(newQuestionReq.getPicUrl())
+            .orElseGet(() -> {
+              NewPictureReq newPictureReq = new NewPictureReq();
+              newPictureReq.setPicUrl(newQuestionReq.getPicUrl());
+              newPictureReq.setCityName(newQuestionReq.getCityName());
+              return pictureManager.newPicture(newPictureReq);
+            });
 
     Set<Long> choices = staticDataManager.prepareChoices(savedPicture.getCityId());
     Question newQuestion = new Question(UUID.randomUUID(), savedPicture, choices);
