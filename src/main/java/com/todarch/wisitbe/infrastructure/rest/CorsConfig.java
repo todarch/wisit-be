@@ -1,4 +1,4 @@
-package com.todarch.wisitbe.infrastructure.web;
+package com.todarch.wisitbe.infrastructure.rest;
 
 import java.util.Arrays;
 import java.util.Collections;
