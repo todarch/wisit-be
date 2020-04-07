@@ -91,21 +91,17 @@ public class QuestionManager {
     return new ArrayList<>(choices);
   }
 
-  public Question createQuestion(NewQuestionReq newQuestionReq) {
-    Objects.requireNonNull(newQuestionReq.getPicUrl(), "picurl cannot be null");
-    Objects.requireNonNull(newQuestionReq.getCityName(), "city cannot be null");
+  public void createQuestion(long pictureId) {
+    Picture foundPicture =
+        pictureRepository.findById(pictureId)
+        .orElseThrow(() -> new RuntimeException("Picture not found: " + pictureId));
 
-    Picture savedPicture =
-        pictureRepository.findByUrl(newQuestionReq.getPicUrl())
-            .orElseGet(() -> {
-              NewPictureReq newPictureReq = new NewPictureReq();
-              newPictureReq.setPicUrl(newQuestionReq.getPicUrl());
-              newPictureReq.setCityName(newQuestionReq.getCityName());
-              return pictureManager.newPicture(newPictureReq);
-            });
+    doCreateQuestion(foundPicture);
+  }
 
-    Set<Long> choices = staticDataManager.prepareChoices(savedPicture.getCityId());
-    Question newQuestion = new Question(UUID.randomUUID(), savedPicture, choices);
+  private Question doCreateQuestion(Picture picture) {
+    Set<Long> choices = staticDataManager.prepareChoices(picture.getCityId());
+    Question newQuestion = new Question(UUID.randomUUID(), picture, choices);
     Question savedQuestion = questionRepository.save(newQuestion);
 
     QuestionCreatedEvent questionCreatedEvent = new QuestionCreatedEvent();

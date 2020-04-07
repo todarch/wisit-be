@@ -30,15 +30,6 @@ public class QuestionResource {
 
   private final WisitEventPublisher wisitEventPublisher;
 
-  @InternalOnly
-  @PostMapping
-  public ResponseEntity<Question> createQuestion(@RequestBody NewQuestionReq newQuestionReq) {
-    long tid = Thread.currentThread().getId();
-    log.info("tid={} ", tid);
-    Question createdQuestion = questionManager.createQuestion(newQuestionReq);
-    return ResponseEntity.status(HttpStatus.CREATED).body(createdQuestion);
-  }
-
   @GetMapping("/next")
   public ResponseEntity<PreparedUserQuestion> nextQuestion() {
     CurrentUser currentUser = currentUserProvider.currentUser();

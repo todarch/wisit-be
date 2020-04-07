@@ -2,6 +2,8 @@ package com.todarch.wisitbe.infrastructure.messaging.listener;
 
 import static com.todarch.wisitbe.domain.question.UserQuestionFactory.createQuestionForUser;
 
+import com.todarch.wisitbe.application.picture.PictureManager;
+import com.todarch.wisitbe.application.question.QuestionManager;
 import com.todarch.wisitbe.domain.question.AskedQuestion;
 import com.todarch.wisitbe.domain.question.AskedQuestionFactory;
 import com.todarch.wisitbe.domain.question.AskedQuestionRepository;
@@ -10,6 +12,7 @@ import com.todarch.wisitbe.domain.question.QuestionRepository;
 import com.todarch.wisitbe.domain.question.UserQuestion;
 import com.todarch.wisitbe.domain.question.UserQuestionRepository;
 import com.todarch.wisitbe.domain.user.UserRepository;
+import com.todarch.wisitbe.infrastructure.messaging.event.PictureCreatedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.event.UserQuestionAnsweredEvent;
 import com.todarch.wisitbe.infrastructure.messaging.event.QuestionCreatedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.event.UserCreatedEvent;
@@ -34,6 +37,8 @@ public class WisitEventListener {
   private final UserRepository userRepository;
 
   private final AskedQuestionRepository askedQuestionRepository;
+
+  private final QuestionManager questionManager;
 
   @EventListener
   @Async
@@ -80,6 +85,14 @@ public class WisitEventListener {
           askedQuestionRepository.save(askedQuestion);
           userQuestionRepository.deleteById(userQuestionId);
         });
+  }
+
+  @EventListener
+  @Async
+  public void onPictureCreated(PictureCreatedEvent pictureCreatedEvent) {
+    long createdPicId = pictureCreatedEvent.getCreatedPictureId();
+
+    questionManager.createQuestion(createdPicId);
   }
 
   private long tid() {

@@ -3,6 +3,8 @@ package com.todarch.wisitbe.rest.picture;
 import com.todarch.wisitbe.application.picture.PictureManager;
 import com.todarch.wisitbe.domain.picture.Picture;
 import com.todarch.wisitbe.infrastructure.aspect.InternalOnly;
+import com.todarch.wisitbe.infrastructure.messaging.event.PictureCreatedEvent;
+import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -21,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 public class PictureResource {
 
-  private PictureManager pictureManager;
+  private final PictureManager pictureManager;
 
   @GetMapping("/next")
   public ResponseEntity<Picture> next() {
@@ -42,7 +44,7 @@ public class PictureResource {
   @InternalOnly
   @PostMapping
   public ResponseEntity<Picture> newPicture(@RequestBody NewPictureReq picture) {
-    Objects.requireNonNull(picture.getPicUrl(), "pic url cannot be null");
+    Objects.requireNonNull(picture.getPicUrl(), "Picture url is required.");
     Picture createdPic = pictureManager.newPicture(picture);
     return ResponseEntity.status(HttpStatus.CREATED).body(createdPic);
   }
