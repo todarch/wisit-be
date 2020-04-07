@@ -1,10 +1,11 @@
 package com.todarch.wisitbe.rest.dummy;
 
+import com.todarch.wisitbe.domain.user.UserRepository;
 import com.todarch.wisitbe.infrastructure.security.CurrentUser;
 import com.todarch.wisitbe.infrastructure.security.CurrentUserProvider;
-import java.util.Currency;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import javax.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,6 +20,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class DummyController {
 
   private final CurrentUserProvider currentUserProvider;
+
+  private final UserRepository userRepository;
+
+  @GetMapping("/swap-me")
+  public void swapMe() {
+    CurrentUser currentUser = currentUserProvider.currentUser();
+    userRepository.findById(currentUser.getId())
+        .ifPresent(user -> {
+          user.setIp("swapped" + ThreadLocalRandom.current().nextLong(1000000));
+          userRepository.saveAndFlush(user);
+        });
+  }
 
   @GetMapping("/my-info")
   public ResponseEntity<MyInfo> getMyInfo(HttpServletRequest request) {
