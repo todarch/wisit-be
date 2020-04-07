@@ -4,7 +4,7 @@ import java.util.Set;
 import lombok.Data;
 
 @Data
-public class QuestionWithNoAnswer {
+public class PreparedQuestion {
   private String questionId;
   private String picUrl;
   private Set<String> choices;

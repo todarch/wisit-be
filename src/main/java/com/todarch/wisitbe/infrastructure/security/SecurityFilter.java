@@ -2,6 +2,8 @@ package com.todarch.wisitbe.infrastructure.security;
 
 import com.todarch.wisitbe.domain.user.User;
 import com.todarch.wisitbe.domain.user.UserRepository;
+import com.todarch.wisitbe.infrastructure.messaging.event.UserCreatedEvent;
+import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
 import java.io.IOException;
 import java.util.UUID;
 import javax.servlet.FilterChain;
@@ -25,6 +27,8 @@ public class SecurityFilter extends GenericFilterBean {
 
   private final UserRepository userRepository;
 
+  private final WisitEventPublisher wisitEventPublisher;
+
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
       throws IOException, ServletException {
@@ -44,7 +48,11 @@ public class SecurityFilter extends GenericFilterBean {
           user.setId(UUID.randomUUID().toString());
           user.setIp(userIp);
           user.setUserAgent(httpServletRequest.getHeader("User-Agent"));
-          return userRepository.saveAndFlush(user);
+          User newUser = userRepository.saveAndFlush(user);
+          UserCreatedEvent userCreatedEvent = new UserCreatedEvent();
+          userCreatedEvent.setUserId(newUser.getId());
+          wisitEventPublisher.publishEvent(userCreatedEvent);
+          return newUser;
         });
     CurrentUser currentUser = new CurrentUser();
     currentUser.setId(loadedUser.getId());

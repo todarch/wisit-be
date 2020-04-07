@@ -42,14 +42,8 @@ public class PictureResource {
   @InternalOnly
   @PostMapping
   public ResponseEntity<Picture> newPicture(@RequestBody NewPictureReq picture) {
-    Objects.requireNonNull(picture.getUrl(), "pic url cannot be null");
+    Objects.requireNonNull(picture.getPicUrl(), "pic url cannot be null");
     Picture createdPic = pictureManager.newPicture(picture);
     return ResponseEntity.status(HttpStatus.CREATED).body(createdPic);
-  }
-
-  @Data
-  public static class NewPictureReq {
-    private String url;
-    private String city;
   }
 }

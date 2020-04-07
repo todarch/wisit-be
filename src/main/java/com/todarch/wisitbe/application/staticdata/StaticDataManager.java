@@ -49,7 +49,9 @@ public class StaticDataManager {
     while (choices.size() != 3) {
       int randomIndex = random.nextInt(cityIds.size());
       Long randomId = cityIds.get(randomIndex);
-      choices.add(randomId);
+      if (randomId != answerCityId) {
+        choices.add(randomId);
+      }
     }
 
     return choices;

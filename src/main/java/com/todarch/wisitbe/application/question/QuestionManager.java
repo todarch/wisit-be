@@ -7,22 +7,30 @@ import com.todarch.wisitbe.domain.fix.CityRepository;
 import com.todarch.wisitbe.domain.picture.Picture;
 import com.todarch.wisitbe.domain.question.Question;
 import com.todarch.wisitbe.domain.question.QuestionRepository;
+import com.todarch.wisitbe.domain.question.UserQuestion;
+import com.todarch.wisitbe.domain.question.UserQuestionRepository;
+import com.todarch.wisitbe.infrastructure.messaging.event.QuestionCreatedEvent;
+import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
 import com.todarch.wisitbe.rest.game.SimpleQuestion;
-import com.todarch.wisitbe.rest.question.AnswerQuestion;
+import com.todarch.wisitbe.rest.picture.NewPictureReq;
+import com.todarch.wisitbe.rest.question.AnswerUserQuestion;
 import com.todarch.wisitbe.rest.question.NewQuestionReq;
-import com.todarch.wisitbe.rest.question.QuestionAnswer;
-import com.todarch.wisitbe.rest.question.QuestionWithNoAnswer;
+import com.todarch.wisitbe.rest.question.PreparedQuestion;
+import com.todarch.wisitbe.rest.question.UserQuestionAnswer;
+import com.todarch.wisitbe.rest.question.PreparedUserQuestion;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -36,6 +44,10 @@ public class QuestionManager {
   private final StaticDataManager staticDataManager;
 
   private final PictureManager pictureManager;
+
+  private final WisitEventPublisher wisitEventPublisher;
+
+  private final UserQuestionRepository userQuestionRepository;
 
   private Map<Long, String> citiesById;
 
@@ -78,40 +90,86 @@ public class QuestionManager {
 
   public Question createQuestion(NewQuestionReq newQuestionReq) {
     Objects.requireNonNull(newQuestionReq.getPicUrl(), "picurl cannot be null");
-    Objects.requireNonNull(newQuestionReq.getCity(), "city cannot be null");
-    Picture picture = new Picture();
-    picture.setUrl(newQuestionReq.getPicUrl());
-    Long cityId = staticDataManager.tryToFindCityId(newQuestionReq.getCity());
-    picture.setCityId(cityId);
+    Objects.requireNonNull(newQuestionReq.getCityName(), "city cannot be null");
 
-    return new Question(UUID.randomUUID(), picture, staticDataManager.prepareChoices(cityId));
+    NewPictureReq newPictureReq = new NewPictureReq();
+    newPictureReq.setPicUrl(newQuestionReq.getPicUrl());
+    newPictureReq.setCityName(newQuestionReq.getCityName());
+    Picture savedPicture = pictureManager.newPicture(newPictureReq);
+
+    Set<Long> choices = staticDataManager.prepareChoices(savedPicture.getCityId());
+    Question newQuestion = new Question(UUID.randomUUID(), savedPicture, choices);
+    Question savedQuestion = questionRepository.save(newQuestion);
+
+    QuestionCreatedEvent questionCreatedEvent = new QuestionCreatedEvent();
+    questionCreatedEvent.setQuestionId(savedQuestion.getId());
+    wisitEventPublisher.publishEvent(questionCreatedEvent);
+
+    return savedQuestion;
   }
 
-  public QuestionWithNoAnswer nextFor(String userId) {
+  public Optional<PreparedUserQuestion> nextFor(String userId) {
+    List<com.todarch.wisitbe.domain.question.UserQuestion> allQuestionsForUser = userQuestionRepository.findAllByUserId(userId);
+    if (allQuestionsForUser.isEmpty()) {
+      return Optional.empty();
+    }
+
+    int randomIndex = randomIndex(allQuestionsForUser.size());
+    com.todarch.wisitbe.domain.question.UserQuestion userQuestion = allQuestionsForUser.get(randomIndex);
+
+    return Optional.of(toQuestionWithNoAnswer(userQuestion));
+  }
+
+  private int randomIndex(int bound) {
     ThreadLocalRandom random = ThreadLocalRandom.current();
-    List<Question> questions = questionRepository.findAll();
-    Question question = questions.get(random.nextInt(questions.size()));
-    QuestionWithNoAnswer questionWithNoAnswer = new QuestionWithNoAnswer();
-    questionWithNoAnswer.setQuestionId(question.getId());
-    questionWithNoAnswer.setPicUrl(question.pictureUrl());
-    questionWithNoAnswer.setChoices(staticDataManager.toCityNames(question.choices()));
-    questionWithNoAnswer.setChoiceCityIds(question.choices());
-    return questionWithNoAnswer;
+    return random.nextInt(bound);
   }
 
-  public QuestionAnswer answer(AnswerQuestion answerQuestion) {
-    Objects.requireNonNull(answerQuestion.getQuestionId(), "QuestionId is required");
-    Question question = questionRepository.findById(answerQuestion.getQuestionId())
-        .orElseThrow(() -> new RuntimeException("Question not found: " + answerQuestion.getQuestionId()));
+  private PreparedUserQuestion toQuestionWithNoAnswer(UserQuestion userQuestion) {
+    Question question = userQuestion.getQuestion();
+    PreparedUserQuestion preparedUserQuestion = new PreparedUserQuestion();
+    preparedUserQuestion.setUserQuestionId(userQuestion.getId());
+    preparedUserQuestion.setPicUrl(question.pictureUrl());
+    preparedUserQuestion.setChoices(staticDataManager.toCityNames(question.choices()));
+    preparedUserQuestion.setChoiceCityIds(question.choices());
+    return preparedUserQuestion;
+  }
 
-    boolean knew = question.isCorrectAnswer(answerQuestion.getCityId());
+  public UserQuestionAnswer answer(@NonNull String userId, @NonNull AnswerUserQuestion answerUserQuestion) {
+    String userQuestionId = answerUserQuestion.getUserQuestionId();
+    Objects.requireNonNull(userQuestionId, "UserQuestionId is required");
 
-    QuestionAnswer questionAnswer = new QuestionAnswer();
-    questionAnswer.setQuestionId(answerQuestion.getQuestionId());
-    questionAnswer.setCorrectCity(staticDataManager.getCityById(question.answerCityId()));
-    questionAnswer.setGivenCity(staticDataManager.getCityById(answerQuestion.getCityId()));
-    questionAnswer.setKnew(knew);
+    UserQuestion userQuestion = userQuestionRepository.findById(userQuestionId)
+        .orElseThrow(() -> new RuntimeException("UserQuestion not found: " + userQuestionId));
 
-    return questionAnswer;
+    if (!userQuestion.getUserId().equals(userId)) {
+        throw new RuntimeException(userQuestionId + " user question is not for user: " + userId);
+    }
+
+    Question question = userQuestion.getQuestion();
+
+    boolean knew = question.isCorrectAnswer(answerUserQuestion.getCityId());
+
+    UserQuestionAnswer userQuestionAnswer = new UserQuestionAnswer();
+    userQuestionAnswer.setUserQuestionId(userQuestion.getId());
+    userQuestionAnswer.setCorrectCity(staticDataManager.getCityById(question.answerCityId()));
+    userQuestionAnswer.setGivenCity(staticDataManager.getCityById(answerUserQuestion.getCityId()));
+    userQuestionAnswer.setKnew(knew);
+
+    return userQuestionAnswer;
+  }
+
+  public Optional<PreparedQuestion> getById(String questionId) {
+    return questionRepository.findById(questionId)
+        .map(this::toQuestionWithNoAnswer);
+  }
+
+  private PreparedQuestion toQuestionWithNoAnswer(Question question) {
+    PreparedQuestion preparedQuestion = new PreparedQuestion();
+    preparedQuestion.setQuestionId(question.getId());
+    preparedQuestion.setPicUrl(question.pictureUrl());
+    preparedQuestion.setChoices(staticDataManager.toCityNames(question.choices()));
+    preparedQuestion.setChoiceCityIds(question.choices());
+    return preparedQuestion;
   }
 }

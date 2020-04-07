@@ -1,0 +1,7 @@
+CREATE TABLE asked_questions (
+    id SERIAL NOT NULL PRIMARY KEY,
+    user_id VARCHAR(36) NOT NULL,
+    question_id VARCHAR(36) NOT NULL,
+    knew BOOLEAN NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);

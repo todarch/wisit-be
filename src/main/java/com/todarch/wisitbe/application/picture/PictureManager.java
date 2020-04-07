@@ -3,7 +3,7 @@ package com.todarch.wisitbe.application.picture;
 import com.todarch.wisitbe.application.staticdata.StaticDataManager;
 import com.todarch.wisitbe.domain.picture.Picture;
 import com.todarch.wisitbe.domain.picture.PictureRepository;
-import com.todarch.wisitbe.rest.picture.PictureResource;
+import com.todarch.wisitbe.rest.picture.NewPictureReq;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
@@ -23,10 +23,10 @@ public class PictureManager {
     return all.get(ThreadLocalRandom.current().nextInt(all.size()));
   }
 
-  public Picture newPicture(PictureResource.NewPictureReq picture) {
+  public Picture newPicture(NewPictureReq pictureReq) {
     Picture newPic = new Picture();
-    newPic.setUrl(picture.getUrl());
-    newPic.setCityId(staticDataManager.tryToFindCityId(picture.getCity()));
+    newPic.setUrl(pictureReq.getPicUrl());
+    newPic.setCityId(staticDataManager.tryToFindCityId(pictureReq.getCityName()));
     return pictureRepository.save(newPic);
   }
 

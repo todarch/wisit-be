@@ -1,9 +1,9 @@
-package com.todarch.wisitbe.rest.question;
+package com.todarch.wisitbe.rest.picture;
 
 import lombok.Data;
 
 @Data
-public class NewQuestionReq {
+public class NewPictureReq {
   private String picUrl;
   private String cityName;
 }
