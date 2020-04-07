@@ -3,6 +3,7 @@ package com.todarch.wisitbe.application.staticdata;
 import com.todarch.wisitbe.domain.fix.City;
 import com.todarch.wisitbe.domain.fix.CityRepository;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,7 @@ public class StaticDataManager {
 
   @PostConstruct
   private void loadData() {
-    cities = cityRepository.findAll();
+    cities = cityRepository.findAllByOrderByName();
     citiesById = cities.stream()
         .collect(Collectors.toUnmodifiableMap(City::getId, City::getName));
 
@@ -64,6 +65,10 @@ public class StaticDataManager {
   }
 
   public City getCityById(long answerCityId) {
-    return cityRepository.findById(answerCityId).get();
+    return cityRepository.findById(answerCityId).orElse(null);
+  }
+
+  public List<City> getCities() {
+    return Collections.unmodifiableList(cities);
   }
 }

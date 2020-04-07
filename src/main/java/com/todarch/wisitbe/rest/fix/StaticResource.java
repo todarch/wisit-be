@@ -1,5 +1,6 @@
 package com.todarch.wisitbe.rest.fix;
 
+import com.todarch.wisitbe.application.staticdata.StaticDataManager;
 import com.todarch.wisitbe.domain.fix.City;
 import com.todarch.wisitbe.domain.fix.CityRepository;
 import com.todarch.wisitbe.domain.fix.Continent;
@@ -20,7 +21,8 @@ public class StaticResource {
 
   private ContinentRepository continentRepository;
   private CountryRepository countryRepository;
-  private CityRepository cityRepository;
+
+  private final StaticDataManager staticDataManager;
 
   @GetMapping("/continents")
   public ResponseEntity<List<Continent>> continents() {
@@ -36,8 +38,7 @@ public class StaticResource {
 
   @GetMapping("/cities")
   public ResponseEntity<List<City>> cities() {
-    List<City> all = cityRepository.findAll();
-    return ResponseEntity.ok(all);
+    return ResponseEntity.ok(staticDataManager.getCities());
   }
 
 }
