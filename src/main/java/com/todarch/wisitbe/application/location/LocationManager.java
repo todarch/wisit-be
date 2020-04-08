@@ -35,14 +35,9 @@ public class LocationManager {
     cityIds = new ArrayList<>(citiesById.keySet());
   }
 
-  public Long tryToFindCityId(String givenCity) {
-    return cities.stream()
-        .filter(city -> city.getName().equalsIgnoreCase(givenCity))
-        .findFirst()
-        .orElseThrow(() -> new RuntimeException("Not-existing city in system: " + givenCity))
-        .getId();
-  }
-
+  /**
+   * Prepares other choices to be used with correct answer.
+   */
   public Set<Long> prepareChoices(long answerCityId) {
     ThreadLocalRandom random = ThreadLocalRandom.current();
     Set<Long> choices = new HashSet<>(3);
@@ -58,8 +53,11 @@ public class LocationManager {
     return choices;
   }
 
-  public Set<String> toCityNames(Set<Long> choices) {
-    return choices.stream()
+  /**
+   * Maps city ids to city names for ui.
+   */
+  public Set<String> toCityNames(Set<Long> cityIds) {
+    return cityIds.stream()
         .map(cityId -> citiesById.get(cityId))
         .collect(Collectors.toSet());
   }

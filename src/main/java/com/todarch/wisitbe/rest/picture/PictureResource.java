@@ -3,12 +3,9 @@ package com.todarch.wisitbe.rest.picture;
 import com.todarch.wisitbe.application.picture.PictureManager;
 import com.todarch.wisitbe.domain.picture.Picture;
 import com.todarch.wisitbe.infrastructure.aspect.InternalOnly;
-import com.todarch.wisitbe.infrastructure.messaging.event.PictureCreatedEvent;
-import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,12 +22,9 @@ public class PictureResource {
 
   private final PictureManager pictureManager;
 
-  @GetMapping("/next")
-  public ResponseEntity<Picture> next() {
-    Picture next = pictureManager.next();
-    return ResponseEntity.ok(next);
-  }
-
+  /**
+   * Returns the details of an picture by id.
+   */
   @GetMapping("/:id")
   public ResponseEntity<Picture> picById(@PathVariable long id) {
     Optional<Picture> optionalPic = pictureManager.getById(id);
@@ -41,11 +35,14 @@ public class PictureResource {
     return ResponseEntity.notFound().build();
   }
 
+  /**
+   * Enables adding new picture into the system.
+   */
   @InternalOnly
   @PostMapping
   public ResponseEntity<Picture> newPicture(@RequestBody NewPictureReq picture) {
     Objects.requireNonNull(picture.getPicUrl(), "Picture url is required.");
-    Picture createdPic = pictureManager.newPicture(picture);
+    Picture createdPic = pictureManager.addNewPicture(picture);
     return ResponseEntity.status(HttpStatus.CREATED).body(createdPic);
   }
 }

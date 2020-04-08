@@ -23,6 +23,9 @@ public class DummyController {
 
   private final UserRepository userRepository;
 
+  /**
+   * Makes it easy to be treated like a new registered user.
+   */
   @GetMapping("/swap-me")
   public void swapMe() {
     CurrentUser currentUser = currentUserProvider.currentUser();
@@ -33,10 +36,13 @@ public class DummyController {
         });
   }
 
+  /**
+   * Sends back information comes with the request.
+   * Helper to see what is going on behind a proxy.
+   */
   @GetMapping("/my-info")
   public ResponseEntity<MyInfo> getMyInfo(HttpServletRequest request) {
     String userAgentInfo = request.getHeader("User-Agent");
-    String remoteAddr = request.getRemoteAddr();
 
     Map<String, String> headers = new HashMap<>();
     request.getHeaderNames().asIterator()
@@ -45,7 +51,7 @@ public class DummyController {
     MyInfo myInfo = new MyInfo();
     myInfo.setAgent(userAgentInfo);
     myInfo.setHeaders(headers);
-    myInfo.setRemoteAddr(remoteAddr);
+    myInfo.setRemoteAddr(request.getRemoteAddr());
 
     return ResponseEntity.ok(myInfo);
   }

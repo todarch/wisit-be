@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -39,12 +38,19 @@ public class Question {
   @Column(name = "city_id3")
   private long choice3;
 
+  /**
+   * Constructs a question with validating prerequisites.
+   */
   public Question(@NonNull UUID id,
                   @NonNull Picture picture,
                   @NonNull Set<Long> choices) {
     requireValidChoices(choices, picture);
     this.id = id.toString();
     this.picture = picture;
+    extract(choices);
+  }
+
+  private void extract(@NonNull Set<Long> choices) {
     Iterator<Long> iterator = choices.iterator();
     this.choice1 = iterator.next();
     iterator.hasNext();
@@ -79,6 +85,9 @@ public class Question {
     return this.picture.getCityId();
   }
 
+  /**
+   * Provides the choices of question.
+   */
   public @NonNull Set<Long> choices() {
     Set<Long> choices = new HashSet<>(4);
     choices.add(picture.getCityId());

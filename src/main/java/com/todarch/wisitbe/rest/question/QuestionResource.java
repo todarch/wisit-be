@@ -1,15 +1,12 @@
 package com.todarch.wisitbe.rest.question;
 
 import com.todarch.wisitbe.application.question.QuestionManager;
-import com.todarch.wisitbe.domain.question.Question;
-import com.todarch.wisitbe.infrastructure.aspect.InternalOnly;
 import com.todarch.wisitbe.infrastructure.messaging.event.UserQuestionAnsweredEvent;
 import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
 import com.todarch.wisitbe.infrastructure.security.CurrentUser;
 import com.todarch.wisitbe.infrastructure.security.CurrentUserProvider;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +27,9 @@ public class QuestionResource {
 
   private final WisitEventPublisher wisitEventPublisher;
 
+  /**
+   * Returns the next question for the current user.
+   */
   @GetMapping("/next")
   public ResponseEntity<PreparedUserQuestion> nextQuestion() {
     CurrentUser currentUser = currentUserProvider.currentUser();
@@ -40,6 +40,9 @@ public class QuestionResource {
     return ResponseEntity.ok(optionalQuestion.get());
   }
 
+  /**
+   * Returns the details of a question by id.
+   */
   @GetMapping("/{questionId}")
   public ResponseEntity<PreparedQuestion> questionById(@PathVariable String questionId) {
     var optionalQuestion = questionManager.getById(questionId);
@@ -49,10 +52,14 @@ public class QuestionResource {
     return ResponseEntity.ok(optionalQuestion.get());
   }
 
+  /**
+   * Lets user answer one of their question and got feedback about the same question.
+   */
   @PostMapping("/answer")
-  public ResponseEntity<UserQuestionAnswer> answerQuestion(@RequestBody AnswerUserQuestion answerUserQuestion) {
+  public ResponseEntity<UserQuestionAnswer> answerQuestion(@RequestBody AnswerUserQuestion answer) {
     CurrentUser currentUser = currentUserProvider.currentUser();
-    UserQuestionAnswer userQuestionAnswer = questionManager.answer(currentUser.getId(), answerUserQuestion);
+    UserQuestionAnswer userQuestionAnswer =
+        questionManager.answer(currentUser.getId(), answer);
 
     UserQuestionAnsweredEvent userQuestionAnsweredEvent = new UserQuestionAnsweredEvent();
     userQuestionAnsweredEvent.setKnew(userQuestionAnswer.isKnew());
@@ -61,6 +68,5 @@ public class QuestionResource {
 
     return ResponseEntity.ok(userQuestionAnswer);
   }
-
 
 }

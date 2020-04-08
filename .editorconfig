@@ -11,6 +11,7 @@ charset = utf-8
 trim_trailing_whitespace = true
 indent_size = 2
 indent_style = space
+max_line_length = 100
 
 [*.java]
 # idea specific, method chain indentation

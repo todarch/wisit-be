@@ -1,8 +1,6 @@
 package com.todarch.wisitbe.infrastructure.aspect;
 
 import com.todarch.wisitbe.infrastructure.config.WisitProperties;
-import java.util.Objects;
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -20,21 +18,24 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @AllArgsConstructor
 public class JustInternalAspect {
 
-    private final WisitProperties wisitProperties;
-    private final Environment environment;
+  private final WisitProperties wisitProperties;
+  private final Environment environment;
 
-    @Around("@annotation(com.todarch.wisitbe.infrastructure.aspect.InternalOnly)")
-    public Object doNotProceedOnProd(ProceedingJoinPoint joinPoint) throws Throwable {
-      HttpServletRequest request = currentRequest();
-      String internalHeaderVal = request.getHeader(wisitProperties.getInternalHeaderName());
+  /**
+   * Tries to disable access to some endpoints for unknown user.
+   */
+  @Around("@annotation(com.todarch.wisitbe.infrastructure.aspect.InternalOnly)")
+  public Object requireAccessToInternalEndpoint(ProceedingJoinPoint joinPoint) throws Throwable {
+    HttpServletRequest request = currentRequest();
+    String internalHeaderVal = request.getHeader(wisitProperties.getInternalHeaderName());
 
-      if (environment.acceptsProfiles(Profiles.of("prod"))) {
-        if (!wisitProperties.getInternalHeaderValue().equals(internalHeaderVal)) {
-          throw new RuntimeException("Not allowed to run this method");
-        }
+    if (environment.acceptsProfiles(Profiles.of("prod"))) {
+      if (!wisitProperties.getInternalHeaderValue().equals(internalHeaderVal)) {
+        throw new RuntimeException("Not allowed to run this method");
       }
-      return joinPoint.proceed();
     }
+    return joinPoint.proceed();
+  }
 
   private HttpServletRequest currentRequest() {
     RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();

@@ -6,10 +6,9 @@ import com.todarch.wisitbe.domain.picture.Picture;
 import com.todarch.wisitbe.domain.picture.PictureRepository;
 import com.todarch.wisitbe.infrastructure.messaging.event.PictureCreatedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
+import com.todarch.wisitbe.infrastructure.rest.errorhandling.InvalidInputException;
 import com.todarch.wisitbe.rest.picture.NewPictureReq;
-import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,18 +22,21 @@ public class PictureManager {
 
   private final WisitEventPublisher wisitEventPublisher;
 
-  public Picture next() {
-    List<Picture> all = pictureRepository.findAll();
-    return all.get(ThreadLocalRandom.current().nextInt(all.size()));
-  }
 
-  public Picture newPicture(NewPictureReq pictureReq) {
+  /**
+   * Adds new picture.
+   * Creates an event for the operation so it can be reacted to.
+   * @throws InvalidInputException a picture url can not be added again
+   * @throws InvalidInputException a picture url must be added with a known city
+   */
+  public Picture addNewPicture(NewPictureReq pictureReq) {
     if (pictureRepository.findByUrl(pictureReq.getPicUrl()).isPresent()) {
-      throw new RuntimeException("Picture url is already added.");
+      throw new InvalidInputException("Picture url is already added.");
     }
+
     City city = locationManager.getCityById(pictureReq.getCityId());
     if (city == null) {
-      throw new RuntimeException("City does not exist in the system.");
+      throw new InvalidInputException("City does not exist in the system.");
     }
 
     Picture newPic = new Picture();
