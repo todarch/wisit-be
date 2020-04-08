@@ -1,7 +1,7 @@
-package com.todarch.wisitbe.application.staticdata;
+package com.todarch.wisitbe.application.location;
 
-import com.todarch.wisitbe.domain.fix.City;
-import com.todarch.wisitbe.domain.fix.CityRepository;
+import com.todarch.wisitbe.domain.location.City;
+import com.todarch.wisitbe.domain.location.CityRepository;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
-public class StaticDataManager {
+public class LocationManager {
 
   private final CityRepository cityRepository;
 

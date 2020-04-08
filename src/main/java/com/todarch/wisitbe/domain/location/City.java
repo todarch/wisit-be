@@ -1,4 +1,4 @@
-package com.todarch.wisitbe.domain.fix;
+package com.todarch.wisitbe.domain.location;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,10 +8,10 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import lombok.Getter;
 
-@Table(name = "countries")
+@Table(name = "cities")
 @Entity
 @Getter
-public class Country {
+public class City {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,5 +21,5 @@ public class Country {
   private String name;
 
   @Column
-  private String continentId;
+  private String countryId;
 }

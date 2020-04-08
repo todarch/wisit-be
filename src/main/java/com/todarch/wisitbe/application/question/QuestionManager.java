@@ -1,9 +1,9 @@
 package com.todarch.wisitbe.application.question;
 
 import com.todarch.wisitbe.application.picture.PictureManager;
-import com.todarch.wisitbe.application.staticdata.StaticDataManager;
-import com.todarch.wisitbe.domain.fix.City;
-import com.todarch.wisitbe.domain.fix.CityRepository;
+import com.todarch.wisitbe.application.location.LocationManager;
+import com.todarch.wisitbe.domain.location.City;
+import com.todarch.wisitbe.domain.location.CityRepository;
 import com.todarch.wisitbe.domain.picture.Picture;
 import com.todarch.wisitbe.domain.picture.PictureRepository;
 import com.todarch.wisitbe.domain.question.Question;
@@ -13,9 +13,7 @@ import com.todarch.wisitbe.domain.question.UserQuestionRepository;
 import com.todarch.wisitbe.infrastructure.messaging.event.QuestionCreatedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
 import com.todarch.wisitbe.rest.game.SimpleQuestion;
-import com.todarch.wisitbe.rest.picture.NewPictureReq;
 import com.todarch.wisitbe.rest.question.AnswerUserQuestion;
-import com.todarch.wisitbe.rest.question.NewQuestionReq;
 import com.todarch.wisitbe.rest.question.PreparedQuestion;
 import com.todarch.wisitbe.rest.question.UserQuestionAnswer;
 import com.todarch.wisitbe.rest.question.PreparedUserQuestion;
@@ -42,7 +40,7 @@ public class QuestionManager {
 
   private final QuestionRepository questionRepository;
 
-  private final StaticDataManager staticDataManager;
+  private final LocationManager locationManager;
 
   private final PictureManager pictureManager;
 
@@ -100,7 +98,7 @@ public class QuestionManager {
   }
 
   private Question doCreateQuestion(Picture picture) {
-    Set<Long> choices = staticDataManager.prepareChoices(picture.getCityId());
+    Set<Long> choices = locationManager.prepareChoices(picture.getCityId());
     Question newQuestion = new Question(UUID.randomUUID(), picture, choices);
     Question savedQuestion = questionRepository.save(newQuestion);
 
@@ -133,7 +131,7 @@ public class QuestionManager {
     PreparedUserQuestion preparedUserQuestion = new PreparedUserQuestion();
     preparedUserQuestion.setUserQuestionId(userQuestion.getId());
     preparedUserQuestion.setPicUrl(question.pictureUrl());
-    preparedUserQuestion.setChoices(staticDataManager.toCityNames(question.choices()));
+    preparedUserQuestion.setChoices(locationManager.toCityNames(question.choices()));
     preparedUserQuestion.setChoiceCityIds(question.choices());
     return preparedUserQuestion;
   }
@@ -155,8 +153,8 @@ public class QuestionManager {
 
     UserQuestionAnswer userQuestionAnswer = new UserQuestionAnswer();
     userQuestionAnswer.setUserQuestionId(userQuestion.getId());
-    userQuestionAnswer.setCorrectCity(staticDataManager.getCityById(question.answerCityId()));
-    userQuestionAnswer.setGivenCity(staticDataManager.getCityById(answerUserQuestion.getCityId()));
+    userQuestionAnswer.setCorrectCity(locationManager.getCityById(question.answerCityId()));
+    userQuestionAnswer.setGivenCity(locationManager.getCityById(answerUserQuestion.getCityId()));
     userQuestionAnswer.setKnew(knew);
 
     return userQuestionAnswer;
@@ -171,7 +169,7 @@ public class QuestionManager {
     PreparedQuestion preparedQuestion = new PreparedQuestion();
     preparedQuestion.setQuestionId(question.getId());
     preparedQuestion.setPicUrl(question.pictureUrl());
-    preparedQuestion.setChoices(staticDataManager.toCityNames(question.choices()));
+    preparedQuestion.setChoices(locationManager.toCityNames(question.choices()));
     preparedQuestion.setChoiceCityIds(question.choices());
     return preparedQuestion;
   }

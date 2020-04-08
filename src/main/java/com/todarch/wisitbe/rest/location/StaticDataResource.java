@@ -1,12 +1,11 @@
-package com.todarch.wisitbe.rest.fix;
+package com.todarch.wisitbe.rest.location;
 
-import com.todarch.wisitbe.application.staticdata.StaticDataManager;
-import com.todarch.wisitbe.domain.fix.City;
-import com.todarch.wisitbe.domain.fix.CityRepository;
-import com.todarch.wisitbe.domain.fix.Continent;
-import com.todarch.wisitbe.domain.fix.ContinentRepository;
-import com.todarch.wisitbe.domain.fix.Country;
-import com.todarch.wisitbe.domain.fix.CountryRepository;
+import com.todarch.wisitbe.application.location.LocationManager;
+import com.todarch.wisitbe.domain.location.City;
+import com.todarch.wisitbe.domain.location.Continent;
+import com.todarch.wisitbe.domain.location.ContinentRepository;
+import com.todarch.wisitbe.domain.location.Country;
+import com.todarch.wisitbe.domain.location.CountryRepository;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/static-data")
 @AllArgsConstructor
-public class StaticResource {
+public class StaticDataResource {
 
   private ContinentRepository continentRepository;
   private CountryRepository countryRepository;
 
-  private final StaticDataManager staticDataManager;
+  private final LocationManager locationManager;
 
   @GetMapping("/continents")
   public ResponseEntity<List<Continent>> continents() {
@@ -38,7 +37,7 @@ public class StaticResource {
 
   @GetMapping("/cities")
   public ResponseEntity<List<City>> cities() {
-    return ResponseEntity.ok(staticDataManager.getCities());
+    return ResponseEntity.ok(locationManager.getCities());
   }
 
 }

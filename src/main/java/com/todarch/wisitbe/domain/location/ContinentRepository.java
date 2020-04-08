@@ -1,4 +1,4 @@
-package com.todarch.wisitbe.domain.fix;
+package com.todarch.wisitbe.domain.location;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

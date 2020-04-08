@@ -1,6 +1,6 @@
 package com.todarch.wisitbe.rest.question;
 
-import com.todarch.wisitbe.domain.fix.City;
+import com.todarch.wisitbe.domain.location.City;
 import lombok.Data;
 
 @Data

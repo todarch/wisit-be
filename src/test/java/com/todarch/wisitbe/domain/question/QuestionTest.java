@@ -1,4 +1,4 @@
-package com.todarch.wisitbe.domain;
+package com.todarch.wisitbe.domain.question;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;

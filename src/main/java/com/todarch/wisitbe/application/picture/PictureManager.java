@@ -1,7 +1,7 @@
 package com.todarch.wisitbe.application.picture;
 
-import com.todarch.wisitbe.application.staticdata.StaticDataManager;
-import com.todarch.wisitbe.domain.fix.City;
+import com.todarch.wisitbe.application.location.LocationManager;
+import com.todarch.wisitbe.domain.location.City;
 import com.todarch.wisitbe.domain.picture.Picture;
 import com.todarch.wisitbe.domain.picture.PictureRepository;
 import com.todarch.wisitbe.infrastructure.messaging.event.PictureCreatedEvent;
@@ -19,7 +19,7 @@ public class PictureManager {
 
   private final PictureRepository pictureRepository;
 
-  private final StaticDataManager staticDataManager;
+  private final LocationManager locationManager;
 
   private final WisitEventPublisher wisitEventPublisher;
 
@@ -32,7 +32,7 @@ public class PictureManager {
     if (pictureRepository.findByUrl(pictureReq.getPicUrl()).isPresent()) {
       throw new RuntimeException("Picture url is already added.");
     }
-    City city = staticDataManager.getCityById(pictureReq.getCityId());
+    City city = locationManager.getCityById(pictureReq.getCityId());
     if (city == null) {
       throw new RuntimeException("City does not exist in the system.");
     }
