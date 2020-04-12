@@ -69,4 +69,13 @@ public class LocationManager {
   public List<City> getCities() {
     return Collections.unmodifiableList(cities);
   }
+
+  /**
+   * Converts city ids to city objects.
+   */
+  public Set<City> toCities(Set<Long> cityIds) {
+    return cityIds.stream()
+        .map(this::getCityById)
+        .collect(Collectors.toSet());
+  }
 }

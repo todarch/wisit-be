@@ -2,6 +2,7 @@ package com.todarch.wisitbe.infrastructure.rest.errorhandling;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,28 +15,15 @@ class ApiError {
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
   private LocalDateTime timestamp;
   private String message;
-  private String debugMessage;
-
-  private ApiError() {
-    timestamp = LocalDateTime.now();
-  }
-
-  ApiError(HttpStatus status) {
-    this();
-    this.status = status;
-  }
+  private Map<String, String> validationErrors;
 
   ApiError(HttpStatus status, Throwable ex) {
-    this();
-    this.status = status;
-    this.message = "Unexpected error";
-    this.debugMessage = ex.getLocalizedMessage();
+    this(status, "Unexpected error", ex);
   }
 
   ApiError(HttpStatus status, String message, Throwable ex) {
-    this();
+    this.timestamp = LocalDateTime.now();
     this.status = status;
     this.message = message;
-    this.debugMessage = ex.getLocalizedMessage();
   }
 }
