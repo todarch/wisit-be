@@ -1,0 +1,3 @@
+spring:
+  redis:
+    host: "${TD_REDIS_HOST}"
