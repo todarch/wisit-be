@@ -1,5 +1,6 @@
 package com.todarch.wisitbe.rest.question;
 
+import com.todarch.wisitbe.domain.location.City;
 import java.util.Set;
 import lombok.Data;
 
@@ -7,6 +8,5 @@ import lombok.Data;
 public class PreparedUserQuestion {
   private String userQuestionId;
   private String picUrl;
-  private Set<String> choices;
-  private Set<Long> choiceCityIds;
+  private Set<City> choices;
 }
