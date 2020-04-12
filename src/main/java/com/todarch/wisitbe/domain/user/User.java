@@ -27,9 +27,11 @@ public class User {
   @Column(length = 100, nullable = false)
   private String username;
 
+  /**
+   * we need to do this in order to not loose the constraints on username column for now.
+   */
   public void setId(@NonNull String userId) {
     this.id = userId;
-    // we need to do this in order to not loose the constraints on username column for now
     this.username = userId;
   }
 
