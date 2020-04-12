@@ -15,6 +15,9 @@ spring:
         jdbc.lob.non_contextual_creation: true # fixes clob creation exception
   flyway:
     schemas: wisit
+  redis:
+    host: "${REDIS_HOST:localhost}"
+    port: "${REDIS_PORT:6379}"
 
 info:
   app:
