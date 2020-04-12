@@ -29,7 +29,7 @@ public class DummyController {
   @GetMapping("/swap-me")
   public void swapMe() {
     CurrentUser currentUser = currentUserProvider.currentUser();
-    userRepository.findById(currentUser.getId())
+    userRepository.findById(currentUser.id())
         .ifPresent(user -> {
           user.setIp("swapped" + ThreadLocalRandom.current().nextLong(1000000));
           userRepository.saveAndFlush(user);

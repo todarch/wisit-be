@@ -54,9 +54,7 @@ public class SecurityFilter extends GenericFilterBean {
           wisitEventPublisher.publishEvent(userCreatedEvent);
           return newUser;
         });
-    CurrentUser currentUser = new CurrentUser();
-    currentUser.setId(loadedUser.getId());
-    return currentUser;
+    return new CurrentUser(loadedUser);
   }
 
   /**

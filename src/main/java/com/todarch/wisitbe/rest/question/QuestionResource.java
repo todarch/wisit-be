@@ -33,7 +33,8 @@ public class QuestionResource {
   @GetMapping("/next")
   public ResponseEntity<PreparedUserQuestion> nextQuestion() {
     CurrentUser currentUser = currentUserProvider.currentUser();
-    var optionalQuestion = questionManager.nextFor(currentUser.getId());
+    currentUser.requirePickedUsername();
+    var optionalQuestion = questionManager.nextFor(currentUser.id());
     if (optionalQuestion.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
@@ -58,8 +59,9 @@ public class QuestionResource {
   @PostMapping("/answer")
   public ResponseEntity<UserQuestionAnswer> answerQuestion(@RequestBody AnswerUserQuestion answer) {
     CurrentUser currentUser = currentUserProvider.currentUser();
+    currentUser.requirePickedUsername();
     UserQuestionAnswer userQuestionAnswer =
-        questionManager.answer(currentUser.getId(), answer);
+        questionManager.answer(currentUser.id(), answer);
 
     UserQuestionAnsweredEvent userQuestionAnsweredEvent = new UserQuestionAnsweredEvent();
     userQuestionAnsweredEvent.setKnew(userQuestionAnswer.isKnew());
