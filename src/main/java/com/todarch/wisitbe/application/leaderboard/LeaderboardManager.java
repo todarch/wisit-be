@@ -47,7 +47,7 @@ public class LeaderboardManager {
 
   private Set<ZSetOperations.TypedTuple<String>> getBoard(@NonNull String boardKey) {
     // when user does not know the answer, score goes minus
-    return sortedSetOperations.rangeByScoreWithScores(boardKey, Long.MIN_VALUE, Long.MAX_VALUE);
+    return sortedSetOperations.reverseRangeByScoreWithScores(boardKey, Long.MIN_VALUE, Long.MAX_VALUE);
   }
 
   /**
