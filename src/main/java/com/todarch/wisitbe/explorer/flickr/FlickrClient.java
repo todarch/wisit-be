@@ -4,6 +4,7 @@ import com.todarch.wisitbe.explorer.flickr.model.FlickrPhoto;
 import com.todarch.wisitbe.explorer.flickr.model.FlickrSearchPhotoResponse;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -34,6 +35,8 @@ public class FlickrClient {
     HttpHeaders headers = new HttpHeaders();
     headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
 
+    ThreadLocalRandom random = ThreadLocalRandom.current();
+
     UriComponentsBuilder builder =
         UriComponentsBuilder.fromHttpUrl(flickrProperties.getApiBaseUrl())
             .queryParam("method", "flickr.photos.search")
@@ -42,7 +45,8 @@ public class FlickrClient {
             .queryParam("text", city)
             .queryParam("accuracy", "~11")
             .queryParam("sort", "interestingness-desc")
-            .queryParam("per_page", 5)
+            .queryParam("page", random.nextInt(1, 3000))
+            .queryParam("per_page", random.nextInt(1, 10))
             .queryParam("content_type", 1)
             .queryParam("format", "json")
             .queryParam("nojsoncallback", 1);
