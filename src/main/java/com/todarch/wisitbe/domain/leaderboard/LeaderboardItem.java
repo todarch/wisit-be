@@ -1,4 +1,4 @@
-package com.todarch.wisitbe.infrastructure.redis;
+package com.todarch.wisitbe.domain.leaderboard;
 
 import lombok.Data;
 

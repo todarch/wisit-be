@@ -17,7 +17,7 @@ import com.todarch.wisitbe.infrastructure.messaging.event.ScoreChangedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.event.UserCreatedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.event.UserQuestionAnsweredEvent;
 import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
-import com.todarch.wisitbe.infrastructure.redis.LeaderboardManager;
+import com.todarch.wisitbe.application.leaderboard.LeaderboardManager;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
