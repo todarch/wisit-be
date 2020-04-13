@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisPassword;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -13,9 +15,16 @@ public class RedisConfig {
 
   private final RedisProperties redisProperties;
 
+  /**
+   * Configures lettuce connection factory.
+   */
   @Bean
   LettuceConnectionFactory lettuceConnectionFactory() {
-    return new LettuceConnectionFactory(redisProperties.getHost(), redisProperties.getPort());
+    RedisStandaloneConfiguration standaloneConfiguration = new RedisStandaloneConfiguration();
+    standaloneConfiguration.setHostName(redisProperties.getHost());
+    standaloneConfiguration.setPort(redisProperties.getPort());
+    standaloneConfiguration.setPassword(RedisPassword.of(redisProperties.getPassword()));
+    return new LettuceConnectionFactory(standaloneConfiguration);
   }
 
   /**
