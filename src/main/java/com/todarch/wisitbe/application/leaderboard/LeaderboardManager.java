@@ -1,5 +1,8 @@
 package com.todarch.wisitbe.application.leaderboard;
 
+import static java.lang.Long.MAX_VALUE;
+import static java.lang.Long.MIN_VALUE;
+
 import com.todarch.wisitbe.domain.leaderboard.LeaderboardItem;
 import com.todarch.wisitbe.domain.leaderboard.LeaderboardType;
 import java.util.ArrayList;
@@ -47,7 +50,7 @@ public class LeaderboardManager {
 
   private Set<ZSetOperations.TypedTuple<String>> getBoard(@NonNull String boardKey) {
     // when user does not know the answer, score goes minus
-    return sortedSetOperations.reverseRangeByScoreWithScores(boardKey, Long.MIN_VALUE, Long.MAX_VALUE);
+    return sortedSetOperations.reverseRangeByScoreWithScores(boardKey, MIN_VALUE, MAX_VALUE);
   }
 
   /**
@@ -56,7 +59,7 @@ public class LeaderboardManager {
    */
   public void clean(@NonNull List<LeaderboardType> leaderboardTypes) {
     leaderboardTypes.forEach(leaderboardType -> {
-      sortedSetOperations.removeRange(leaderboardType.key(), Long.MIN_VALUE, Long.MAX_VALUE);
+      sortedSetOperations.removeRange(leaderboardType.key(), MIN_VALUE, MAX_VALUE);
     });
   }
 }
