@@ -4,6 +4,7 @@ import com.todarch.wisitbe.application.location.LocationManager;
 import com.todarch.wisitbe.application.picture.PictureManager;
 import com.todarch.wisitbe.domain.location.City;
 import com.todarch.wisitbe.explorer.flickr.FlickrClient;
+import com.todarch.wisitbe.infrastructure.rest.errorhandling.InvalidInputException;
 import com.todarch.wisitbe.rest.picture.NewPictureReq;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -39,10 +40,14 @@ public class ExplorerManager {
     cities.forEach(city -> {
       List<String> searchPhotos = flickrClient.searchPhotos(city.getName());
       searchPhotos.forEach(picUrl -> {
-        NewPictureReq newPictureReq = new NewPictureReq();
-        newPictureReq.setPicUrl(picUrl);
-        newPictureReq.setCityId(city.getId());
-        pictureManager.addNewPicture(newPictureReq);
+        try {
+          NewPictureReq newPictureReq = new NewPictureReq();
+          newPictureReq.setPicUrl(picUrl);
+          newPictureReq.setCityId(city.getId());
+          pictureManager.addNewPicture(newPictureReq);
+        } catch (InvalidInputException ex) {
+          // ignore if picture url already exists
+        }
       });
     });
   }
