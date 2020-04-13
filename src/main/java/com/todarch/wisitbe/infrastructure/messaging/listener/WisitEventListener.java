@@ -102,7 +102,7 @@ public class WisitEventListener {
 
           ScoreChangedEvent scoreChangedEvent = new ScoreChangedEvent();
           scoreChangedEvent.setUsername(getUsername(userQuestion.getUserId()));
-          scoreChangedEvent.setDelta(event.isKnew() ? 1 : -1);
+          scoreChangedEvent.setDelta(event.isKnew() ? 10 : -5);
           wisitEventPublisher.publishEvent(scoreChangedEvent);
         });
   }
