@@ -25,6 +25,11 @@ public enum LeaderboardType {
     }
   };
 
+  /**
+   * Maps given type to one or more leaderboard types.
+   * Does not care about the spelling or capitalization.
+   * Matches only on the first character.
+   */
   public static List<LeaderboardType> from(String type) {
     if (!StringUtils.hasText(type)) {
       return List.of();

@@ -18,9 +18,12 @@ public class LeaderboardManager {
     this.sortedSetOperations = redisTemplate.opsForZSet();
   }
 
-  public void updateScore(String username, long diff) {
+  /**
+   * Updates scores for given username in all available leaderboards.
+   */
+  public void updateScore(String username, long delta) {
     for (LeaderboardType leaderboardType : LeaderboardType.values()) {
-      sortedSetOperations.incrementScore(leaderboardType.key(), username, diff);
+      sortedSetOperations.incrementScore(leaderboardType.key(), username, delta);
     }
   }
 
@@ -47,6 +50,10 @@ public class LeaderboardManager {
     return sortedSetOperations.rangeByScoreWithScores(boardKey, Long.MIN_VALUE, Long.MAX_VALUE);
   }
 
+  /**
+   * Cleans data in leaderboards.
+   * Useful for development/debugging.
+   */
   public void clean(@NonNull List<LeaderboardType> leaderboardTypes) {
     leaderboardTypes.forEach(leaderboardType -> {
       sortedSetOperations.removeRange(leaderboardType.key(), Long.MIN_VALUE, Long.MAX_VALUE);

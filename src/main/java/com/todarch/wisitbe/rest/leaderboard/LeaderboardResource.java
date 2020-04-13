@@ -1,9 +1,9 @@
 package com.todarch.wisitbe.rest.leaderboard;
 
-import com.todarch.wisitbe.infrastructure.aspect.InternalOnly;
-import com.todarch.wisitbe.domain.leaderboard.LeaderboardItem;
 import com.todarch.wisitbe.application.leaderboard.LeaderboardManager;
+import com.todarch.wisitbe.domain.leaderboard.LeaderboardItem;
 import com.todarch.wisitbe.domain.leaderboard.LeaderboardType;
+import com.todarch.wisitbe.infrastructure.aspect.InternalOnly;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -21,7 +21,10 @@ public class LeaderboardResource {
 
   private final LeaderboardManager leaderboardManager;
 
-
+  /**
+   * Provides access to one of the leaderboards.
+   * ?type=daily|monthly|weekly
+   */
   @GetMapping
   public ResponseEntity<List<LeaderboardItem>> leaderboard(@RequestParam String type) {
     List<LeaderboardType> leaderboardTypes = LeaderboardType.from(type);
@@ -32,6 +35,11 @@ public class LeaderboardResource {
     return ResponseEntity.ok(leaderboard);
   }
 
+  /**
+   * Provides endpoint for cleaning data in leaderboards.
+   * ?type=daily|monthly|weekly
+   * Returns the list of cleaned leaderboards.
+   */
   @InternalOnly
   @PostMapping("/clean")
   public ResponseEntity<List<String>> cleanLeaderboard(@RequestParam String type) {

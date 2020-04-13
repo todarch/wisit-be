@@ -2,6 +2,7 @@ package com.todarch.wisitbe.infrastructure.messaging.listener;
 
 import static com.todarch.wisitbe.domain.question.UserQuestionFactory.createQuestionForUser;
 
+import com.todarch.wisitbe.application.leaderboard.LeaderboardManager;
 import com.todarch.wisitbe.application.question.QuestionManager;
 import com.todarch.wisitbe.domain.question.AskedQuestion;
 import com.todarch.wisitbe.domain.question.AskedQuestionFactory;
@@ -17,7 +18,6 @@ import com.todarch.wisitbe.infrastructure.messaging.event.ScoreChangedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.event.UserCreatedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.event.UserQuestionAnsweredEvent;
 import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
-import com.todarch.wisitbe.application.leaderboard.LeaderboardManager;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
