@@ -14,6 +14,8 @@ import com.todarch.wisitbe.domain.question.UserQuestionRepository;
 import com.todarch.wisitbe.domain.user.UserRepository;
 import com.todarch.wisitbe.infrastructure.messaging.event.PictureCreatedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.event.QuestionCreatedEvent;
+import com.todarch.wisitbe.infrastructure.messaging.event.QuestionReportedEvent;
+import com.todarch.wisitbe.infrastructure.messaging.event.ReportedQuestionResolvedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.event.ScoreChangedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.event.UserCreatedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.event.UserQuestionAnsweredEvent;
@@ -54,7 +56,7 @@ public class WisitEventListener {
   public void onUserCreated(UserCreatedEvent userCreatedEvent) {
     log.info("tid={} new user created with id: {}", tid(), userCreatedEvent.getUserId());
 
-    List<UserQuestion> questionsForUser = questionRepository.findAll()
+    List<UserQuestion> questionsForUser = questionRepository.findAllActive()
         .stream()
         .map(question -> createQuestionForUser(userCreatedEvent.getUserId(), question))
         .collect(Collectors.toList());
@@ -135,5 +137,41 @@ public class WisitEventListener {
 
   private long tid() {
     return Thread.currentThread().getId();
+  }
+
+  /**
+   * Reacts to a question reporting.
+   */
+  @EventListener
+  @Async
+  public void onQuestionReported(QuestionReportedEvent questionReportedEvent) {
+    String questionId = questionReportedEvent.getQuestionId();
+
+    Question question = questionRepository.tryToFindById(questionId);
+    question.inactivate();
+    questionRepository.save(question);
+
+    // let's only disable question itself for now
+    // so at least it will not be processed to create new user questions
+    // if we will decide to remove from user questions, we could run into problem
+    // could be timing issues such as question is asked, removed, answered
+    // maybe we could just disable user questions
+    // anyway we do not have to keep them there, we remove them after asking
+  }
+
+  /**
+   * Reacts when a question report is resolved.
+   */
+  @EventListener
+  @Async
+  public void onReportedQuestionResolved(ReportedQuestionResolvedEvent resolvedEvent) {
+    String questionId = resolvedEvent.getQuestionId();
+
+    Question question = questionRepository.tryToFindById(questionId);
+
+    if (!resolvedEvent.isDisable()) {
+      question.activate();
+      questionRepository.save(question);
+    }
   }
 }

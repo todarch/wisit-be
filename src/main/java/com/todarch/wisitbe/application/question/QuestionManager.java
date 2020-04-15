@@ -131,6 +131,7 @@ public class QuestionManager {
   private PreparedUserQuestion toQuestionWithNoAnswer(UserQuestion userQuestion) {
     Question question = userQuestion.getQuestion();
     PreparedUserQuestion preparedUserQuestion = new PreparedUserQuestion();
+    preparedUserQuestion.setQuestionId(question.getId());
     preparedUserQuestion.setUserQuestionId(userQuestion.getId());
     preparedUserQuestion.setPicUrl(question.pictureUrl());
     preparedUserQuestion.setChoices(locationManager.toCities(question.choices()));

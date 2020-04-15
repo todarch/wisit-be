@@ -20,7 +20,17 @@ public class Picture {
 
   private long cityId;
 
+  private boolean active;
+
   public boolean isFrom(long answerCityId) {
     return cityId == answerCityId;
+  }
+
+  public void inactivate() {
+    this.active = false;
+  }
+
+  public void activate() {
+    this.active = true;
   }
 }

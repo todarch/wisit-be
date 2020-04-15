@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 public class PreparedUserQuestion {
   private String userQuestionId;
+  private String questionId;
   private String picUrl;
   private Set<City> choices;
 }

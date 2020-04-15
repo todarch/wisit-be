@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -25,7 +26,7 @@ public class Question {
   @Getter
   private String id;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.MERGE)
   @JoinColumn(name = "pic_id", referencedColumnName = "id")
   private Picture picture;
 
@@ -37,6 +38,9 @@ public class Question {
 
   @Column(name = "city_id3")
   private long choice3;
+
+  @Column
+  private boolean active;
 
   /**
    * Constructs a question with validating prerequisites.
@@ -95,5 +99,18 @@ public class Question {
     choices.add(choice2);
     choices.add(choice3);
     return choices;
+  }
+
+  /**
+   * When a question is disabled, it will not be used for creating user questions.
+   */
+  public void activate() {
+    this.active = true;
+    this.picture.activate();
+  }
+
+  public void inactivate() {
+    this.active = false;
+    this.picture.inactivate();
   }
 }
