@@ -20,7 +20,7 @@ public class Picture {
 
   private long cityId;
 
-  private boolean active;
+  private boolean active = true; // active by default
 
   public boolean isFrom(long answerCityId) {
     return cityId == answerCityId;

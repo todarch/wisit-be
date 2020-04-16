@@ -93,4 +93,11 @@ class QuestionTest {
     assertThat(question.choices()).isNotEmpty();
     assertThat(question.choices()).hasSize(4);
   }
+
+  @Test
+  void questionIsCreatedActiveByDefault() {
+    Question question = validQuestion();
+
+    assertThat(question.isActive()).isTrue();
+  }
 }

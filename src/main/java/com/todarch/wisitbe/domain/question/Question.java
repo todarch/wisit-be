@@ -52,6 +52,7 @@ public class Question {
     this.id = id.toString();
     this.picture = picture;
     extract(choices);
+    active = true;
   }
 
   private void extract(@NonNull Set<Long> choices) {
