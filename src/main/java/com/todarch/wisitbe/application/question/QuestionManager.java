@@ -67,14 +67,21 @@ public class QuestionManager {
    */
   public Optional<PreparedUserQuestion> nextFor(String userId) {
     List<UserQuestion> allQuestionsForUser = userQuestionRepository.findAllByUserId(userId);
-    if (allQuestionsForUser.isEmpty()) {
-      return Optional.empty();
+
+    // some of the prepared user questions might be already reported ones
+    // get rid off them here until it becomes a headache
+    while (!allQuestionsForUser.isEmpty()) {
+      int randomIndex = randomIndex(allQuestionsForUser.size());
+      UserQuestion userQuestion = allQuestionsForUser.get(randomIndex);
+      if (userQuestion.getQuestion().isNotActive()) {
+        allQuestionsForUser.remove(randomIndex);
+        userQuestionRepository.delete(userQuestion);
+      } else {
+        return Optional.of(toQuestionWithNoAnswer(userQuestion));
+      }
     }
 
-    int randomIndex = randomIndex(allQuestionsForUser.size());
-    UserQuestion userQuestion = allQuestionsForUser.get(randomIndex);
-
-    return Optional.of(toQuestionWithNoAnswer(userQuestion));
+    return Optional.empty();
   }
 
   private int randomIndex(int bound) {

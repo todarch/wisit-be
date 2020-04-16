@@ -113,4 +113,12 @@ public class Question {
     this.active = false;
     this.picture.inactivate();
   }
+
+  public boolean isNotActive() {
+    return !isActive();
+  }
+
+  public boolean isActive() {
+    return this.active;
+  }
 }
