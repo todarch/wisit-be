@@ -1,9 +1,11 @@
 package com.todarch.wisitbe.rest.dummy;
 
 import com.todarch.wisitbe.domain.user.UserRepository;
+import com.todarch.wisitbe.infrastructure.aspect.InternalOnly;
 import com.todarch.wisitbe.infrastructure.security.CurrentUser;
 import com.todarch.wisitbe.infrastructure.security.CurrentUserProvider;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import javax.servlet.http.HttpServletRequest;
@@ -66,5 +68,18 @@ public class DummyController {
     private String remoteAddr;
     private String agent;
     private Map<String, String> headers;
+  }
+
+  /**
+   * Helper endpoint for listing internal links.
+   */
+  @InternalOnly
+  @GetMapping("/internal-links")
+  public ResponseEntity<List<String>> internalLinks() {
+    List<String> links = List.of(
+        "/pictures/new",
+        "/reportings/reported-questions"
+    );
+    return ResponseEntity.ok(links);
   }
 }
