@@ -1,7 +1,6 @@
 package com.todarch.wisitbe.rest.reporting;
 
 import javax.validation.constraints.Min;
-import javax.validation.constraints.Size;
 import lombok.Data;
 
 @Data
