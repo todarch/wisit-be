@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class ReportedQuestionResolvedEvent implements WisitEvent {
   private String questionId;
-  private boolean disable;
+  private boolean inactivate;
 }

@@ -169,9 +169,12 @@ public class WisitEventListener {
 
     Question question = questionRepository.tryToFindById(questionId);
 
-    if (!resolvedEvent.isDisable()) {
+    if (resolvedEvent.isInactivate()) {
+      question.inactivate();
+    } else {
       question.activate();
-      questionRepository.save(question);
     }
+
+    questionRepository.save(question);
   }
 }

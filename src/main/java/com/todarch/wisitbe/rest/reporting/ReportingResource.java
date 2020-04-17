@@ -2,6 +2,7 @@ package com.todarch.wisitbe.rest.reporting;
 
 import com.todarch.wisitbe.application.reporting.ReportingManager;
 import com.todarch.wisitbe.domain.reporting.ReportingReason;
+import com.todarch.wisitbe.infrastructure.aspect.InternalOnly;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -23,6 +24,12 @@ public class ReportingResource {
   @GetMapping("/reasons")
   public ResponseEntity<List<ReportingReason>> reportingReasons() {
     return ResponseEntity.ok(reportingManager.reportingReasons());
+  }
+
+  @InternalOnly
+  @GetMapping("/reported-questions")
+  public ResponseEntity<List<MappedReportedQuestion>> reportedQuestions() {
+    return ResponseEntity.ok(reportingManager.reportedQuestions());
   }
 
   @PostMapping
