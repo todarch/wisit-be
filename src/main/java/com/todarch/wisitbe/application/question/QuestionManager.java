@@ -130,6 +130,7 @@ public class QuestionManager {
     PreparedQuestion preparedQuestion = new PreparedQuestion();
     preparedQuestion.setQuestionId(question.getId());
     preparedQuestion.setPicUrl(question.pictureUrl());
+    preparedQuestion.setCreatedAt(question.createdAt());
     preparedQuestion.setChoices(locationManager.toCityNames(question.choices()));
     preparedQuestion.setChoiceCityIds(question.choices());
     return preparedQuestion;
@@ -141,6 +142,7 @@ public class QuestionManager {
     preparedUserQuestion.setQuestionId(question.getId());
     preparedUserQuestion.setUserQuestionId(userQuestion.getId());
     preparedUserQuestion.setPicUrl(question.pictureUrl());
+    preparedUserQuestion.setCreatedAt(question.createdAt());
     preparedUserQuestion.setChoices(locationManager.toCities(question.choices()));
     return preparedUserQuestion;
   }

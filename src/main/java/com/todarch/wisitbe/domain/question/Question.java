@@ -1,6 +1,7 @@
 package com.todarch.wisitbe.domain.question;
 
 import com.todarch.wisitbe.domain.picture.Picture;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -41,6 +42,9 @@ public class Question {
 
   @Column
   private boolean active;
+
+  @Column(name = "created_at", columnDefinition = "TIMESTAMP")
+  private LocalDateTime createdAt;
 
   /**
    * Constructs a question with validating prerequisites.
@@ -88,6 +92,10 @@ public class Question {
 
   public long answerCityId() {
     return this.picture.getCityId();
+  }
+
+  public LocalDateTime createdAt() {
+    return createdAt;
   }
 
   /**

@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 class ApiError {
   private HttpStatus status;
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
   private LocalDateTime timestamp;
   private String message;
   private Map<String, String> validationErrors;
