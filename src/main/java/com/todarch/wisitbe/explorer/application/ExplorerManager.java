@@ -26,14 +26,14 @@ public class ExplorerManager {
    */
   public void explorePicturesLimited() {
     int limit = 5;
-    List<City> cities = locationManager.getCities();
+    List<City> cities = locationManager.cities();
     ThreadLocalRandom current = ThreadLocalRandom.current();
     int fromIndex = current.nextInt(cities.size() - limit);
     retrievePicturesOf(cities.subList(fromIndex, fromIndex + 5));
   }
 
   public void explorePictures() {
-    retrievePicturesOf(locationManager.getCities());
+    retrievePicturesOf(locationManager.cities());
   }
 
   private void retrievePicturesOf(List<City> cities) {

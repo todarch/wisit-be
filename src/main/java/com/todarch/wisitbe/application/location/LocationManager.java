@@ -30,8 +30,6 @@ public class LocationManager {
 
   private final PictureRepository pictureRepository;
 
-  private List<City> cities;
-
   /**
    * Prepares other choices to be used with correct answer.
    */
@@ -65,8 +63,8 @@ public class LocationManager {
     return cityRepository.findById(answerCityId).orElse(null);
   }
 
-  public List<City> getCities() {
-    return Collections.unmodifiableList(cities);
+  public List<City> cities() {
+    return cityRepository.findAllByOrderByName();
   }
 
   /**

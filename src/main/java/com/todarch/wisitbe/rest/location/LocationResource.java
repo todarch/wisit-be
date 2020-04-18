@@ -24,7 +24,7 @@ public class LocationResource {
 
   @GetMapping("/cities")
   public ResponseEntity<List<City>> cities() {
-    return ResponseEntity.ok(locationManager.getCities());
+    return ResponseEntity.ok(locationManager.cities());
   }
 
   @InternalOnly
