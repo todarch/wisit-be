@@ -22,4 +22,18 @@ public class Country {
 
   @Column
   private String continentId;
+
+  /**
+   * City constructor method.
+   */
+  public City addCity(String cityName) {
+    if (id == null) {
+      throw new RuntimeException("Cannot add city to unknown country");
+    }
+
+    City city = new City();
+    city.setCountryId(id);
+    city.setName(cityName);
+    return city;
+  }
 }

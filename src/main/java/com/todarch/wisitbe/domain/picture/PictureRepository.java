@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PictureRepository extends JpaRepository<Picture, Long> {
   Optional<Picture> findByUrl(String picUrl);
+
+  long countAllByCityId(long cityId);
 }

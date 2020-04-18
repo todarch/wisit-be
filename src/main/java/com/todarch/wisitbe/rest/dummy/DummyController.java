@@ -78,7 +78,8 @@ public class DummyController {
   public ResponseEntity<List<String>> internalLinks() {
     List<String> links = List.of(
         "/pictures/new",
-        "/reportings/reported-questions"
+        "/reportings/reported-questions",
+        "/location/cities"
     );
     return ResponseEntity.ok(links);
   }
