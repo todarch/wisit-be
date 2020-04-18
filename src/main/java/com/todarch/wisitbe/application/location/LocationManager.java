@@ -79,7 +79,7 @@ public class LocationManager {
   }
 
   public List<Country> countries() {
-    return countryRepository.findAll();
+    return countryRepository.findAllByOrderByName();
   }
 
   /**
@@ -97,7 +97,7 @@ public class LocationManager {
     cityDetail.setId(city.getId());
     cityDetail.setCityName(city.getName());
     cityDetail.setCountryName(countryRepository.getById(city.getCountryId()).getName());
-    cityDetail.setNumberOfPictures(pictureRepository.countAllByCityId(city.getId()));
+    cityDetail.setNumberOfPictures(pictureRepository.countAllActiveByCityId(city.getId()));
     return cityDetail;
   }
 
