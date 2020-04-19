@@ -5,5 +5,6 @@ import lombok.Data;
 @Data
 public class AnswerUserQuestion {
   private String userQuestionId;
-  private Long cityId;
+  private long cityId;
+  private long answeredInSeconds;
 }

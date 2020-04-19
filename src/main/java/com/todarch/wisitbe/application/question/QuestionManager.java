@@ -8,6 +8,7 @@ import com.todarch.wisitbe.domain.question.QuestionRepository;
 import com.todarch.wisitbe.domain.question.UserQuestion;
 import com.todarch.wisitbe.domain.question.UserQuestionRepository;
 import com.todarch.wisitbe.infrastructure.messaging.event.QuestionCreatedEvent;
+import com.todarch.wisitbe.infrastructure.messaging.event.UserQuestionAnsweredEvent;
 import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
 import com.todarch.wisitbe.infrastructure.rest.errorhandling.InvalidInputException;
 import com.todarch.wisitbe.infrastructure.rest.errorhandling.ResourceNotFoundException;
@@ -117,6 +118,12 @@ public class QuestionManager {
     userQuestionAnswer.setCorrectCity(locationManager.getCityById(question.answerCityId()));
     userQuestionAnswer.setGivenCity(locationManager.getCityById(answerUserQuestion.getCityId()));
     userQuestionAnswer.setKnew(knew);
+
+    UserQuestionAnsweredEvent userQuestionAnsweredEvent = new UserQuestionAnsweredEvent();
+    userQuestionAnsweredEvent.setKnew(userQuestionAnswer.isKnew());
+    userQuestionAnsweredEvent.setUserQuestionId(userQuestionAnswer.getUserQuestionId());
+    userQuestionAnsweredEvent.setAnsweredInSeconds(answerUserQuestion.getAnsweredInSeconds());
+    wisitEventPublisher.publishEvent(userQuestionAnsweredEvent);
 
     return userQuestionAnswer;
   }

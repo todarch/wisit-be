@@ -28,4 +28,7 @@ public class AskedQuestion {
 
   @Column
   private boolean knew;
+
+  @Column
+  private long answeredInSeconds = 0;
 }

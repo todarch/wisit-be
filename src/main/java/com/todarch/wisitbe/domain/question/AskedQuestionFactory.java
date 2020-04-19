@@ -9,11 +9,14 @@ public final class AskedQuestionFactory {
   /**
    * Creates a question that is already asked and answered question.
    */
-  public static AskedQuestion create(UserQuestion userQuestion, boolean knew) {
+  public static AskedQuestion create(UserQuestion userQuestion,
+                                     boolean knew,
+                                     long answeredInSeconds) {
     AskedQuestion askedQuestion = new AskedQuestion();
     askedQuestion.setUserId(userQuestion.getUserId());
     askedQuestion.setQuestionId(userQuestion.getQuestion().getId());
     askedQuestion.setKnew(knew);
+    askedQuestion.setAnsweredInSeconds(answeredInSeconds);
     return askedQuestion;
   }
 }

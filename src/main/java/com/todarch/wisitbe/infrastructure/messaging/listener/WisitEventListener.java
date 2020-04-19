@@ -98,7 +98,10 @@ public class WisitEventListener {
 
     userQuestionRepository.findById(userQuestionId)
         .ifPresent(userQuestion -> {
-          AskedQuestion askedQuestion = AskedQuestionFactory.create(userQuestion, event.isKnew());
+          AskedQuestion askedQuestion = AskedQuestionFactory.create(
+              userQuestion,
+              event.isKnew(),
+              event.getAnsweredInSeconds());
           askedQuestionRepository.save(askedQuestion);
           userQuestionRepository.deleteById(userQuestionId);
 

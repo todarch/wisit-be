@@ -1,8 +1,6 @@
 package com.todarch.wisitbe.rest.question;
 
 import com.todarch.wisitbe.application.question.QuestionManager;
-import com.todarch.wisitbe.infrastructure.messaging.event.UserQuestionAnsweredEvent;
-import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
 import com.todarch.wisitbe.infrastructure.security.CurrentUser;
 import com.todarch.wisitbe.infrastructure.security.CurrentUserProvider;
 import lombok.AllArgsConstructor;
@@ -24,8 +22,6 @@ public class QuestionResource {
   private final QuestionManager questionManager;
 
   private final CurrentUserProvider currentUserProvider;
-
-  private final WisitEventPublisher wisitEventPublisher;
 
   /**
    * Returns the next question for the current user.
@@ -62,11 +58,6 @@ public class QuestionResource {
     currentUser.requirePickedUsername();
     UserQuestionAnswer userQuestionAnswer =
         questionManager.answer(currentUser.id(), answer);
-
-    UserQuestionAnsweredEvent userQuestionAnsweredEvent = new UserQuestionAnsweredEvent();
-    userQuestionAnsweredEvent.setKnew(userQuestionAnswer.isKnew());
-    userQuestionAnsweredEvent.setUserQuestionId(userQuestionAnswer.getUserQuestionId());
-    wisitEventPublisher.publishEvent(userQuestionAnsweredEvent);
 
     return ResponseEntity.ok(userQuestionAnswer);
   }
