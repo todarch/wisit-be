@@ -57,6 +57,7 @@ public class Question {
     this.picture = picture;
     extract(choices);
     active = true;
+    createdAt = LocalDateTime.now();
   }
 
   private void extract(@NonNull Set<Long> choices) {
