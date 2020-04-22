@@ -2,6 +2,7 @@ package com.todarch.wisitbe.domain.question;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -29,7 +30,7 @@ public class UserQuestion {
   @Column
   private String userId;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.PERSIST)
   @JoinColumn(name = "question_id", referencedColumnName = "id")
   private Question question;
 

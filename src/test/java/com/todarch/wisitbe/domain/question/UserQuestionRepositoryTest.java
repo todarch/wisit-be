@@ -26,9 +26,6 @@ class UserQuestionRepositoryTest {
     UserQuestion userQuestion =
         UserQuestionFactory.createQuestionForUser(testUser.id(), testQuestion);
 
-    // persist each individually, because there is no cascade
-    testEntityManager.persistAndFlush(testQuestion.getPicture());
-    testEntityManager.persistAndFlush(testQuestion);
     testEntityManager.persistAndFlush(userQuestion);
 
     assertThat(userQuestionRepository.findById(userQuestion.getId())).isPresent();
