@@ -1,5 +1,8 @@
 package com.todarch.wisitbe.domain.user;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,10 +13,18 @@ import lombok.NonNull;
 
 @Table(name = "users")
 @Entity
-@Data
+@Data //TODO: get rid off setter/getters
 public class User {
 
   public static final String USERNAME_PATTERN = "^[a-z0-9]{6,100}$";
+
+  /**
+   * LocalDateTime.MIN does not work when passed as date after.
+   * ERROR: timestamp out of range: "169087565-03-15 04:51:43+01".
+   * Create a date we know for sure will be oldest in this case.
+   */
+  public static final LocalDateTime MIN_CREATED_AT_VALUE =
+      LocalDateTime.of(LocalDate.ofYearDay(1992, 18), LocalTime.now());
 
   @Id
   private String id;
@@ -26,6 +37,8 @@ public class User {
 
   @Column(length = 100, nullable = false)
   private String username;
+
+  private LocalDateTime pivotPoint;
 
   /**
    * we need to do this in order to not loose the constraints on username column for now.
@@ -62,5 +75,18 @@ public class User {
       return Optional.of(username);
     }
     return Optional.empty();
+  }
+
+  public LocalDateTime pivotPoint() {
+    return Optional.ofNullable(pivotPoint)
+        .orElse(MIN_CREATED_AT_VALUE);
+  }
+
+  public String id() {
+    return id;
+  }
+
+  public boolean isEligibleForMoreQuestions() {
+    return LocalDateTime.now().minusHours(1).isAfter(pivotPoint());
   }
 }

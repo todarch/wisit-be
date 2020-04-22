@@ -1,0 +1,256 @@
+package com.todarch.wisitbe.application.question;
+
+import static com.todarch.wisitbe.application.question.UserQuestionManager.NEW_QUESTION_PICKING_LIMIT;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+
+import com.todarch.wisitbe.application.location.LocationManager;
+import com.todarch.wisitbe.data.QuestionData;
+import com.todarch.wisitbe.data.UserData;
+import com.todarch.wisitbe.data.UserQuestionData;
+import com.todarch.wisitbe.domain.question.Question;
+import com.todarch.wisitbe.domain.question.QuestionRepository;
+import com.todarch.wisitbe.domain.question.UserQuestion;
+import com.todarch.wisitbe.domain.question.UserQuestionRepository;
+import com.todarch.wisitbe.domain.user.User;
+import com.todarch.wisitbe.domain.user.UserRepository;
+import com.todarch.wisitbe.infrastructure.messaging.event.AlmostAllUserQuestionsAskedEvent;
+import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
+import com.todarch.wisitbe.infrastructure.provider.TimeProvider;
+import com.todarch.wisitbe.rest.question.AnswerUserQuestion;
+import com.todarch.wisitbe.rest.question.PreparedUserQuestion;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+class UserQuestionManagerTest {
+
+  @Mock
+  private UserRepository userRepository;
+
+  @Mock
+  private QuestionRepository questionRepository;
+
+  @Mock
+  private UserQuestionRepository userQuestionRepository;
+
+  @Mock
+  private TimeProvider timeProvider;
+
+  @Mock
+  private WisitEventPublisher wisitEventPublisher;
+
+  @Mock
+  private LocationManager locationManager;
+
+  @InjectMocks
+  private UserQuestionManager userQuestionManager;
+
+  private LocalDateTime fixedTimeAsNow;
+
+  @BeforeEach
+  void setUp() {
+    fixedTimeAsNow = LocalDateTime.of(LocalDate.ofYearDay(1992, 2), LocalTime.now());
+  }
+
+  @Nested
+  class PickForTests {
+
+    @Test
+    void pivotDateBecomesOldestPickedQuestionCreatedAtWhenThereAreEnoughNewQuestions() {
+      User testUser = UserData.newUser();
+      doReturn(testUser).when(userRepository).getById(testUser.getId());
+
+      LocalDateTime currentPivotPoint = testUser.pivotPoint();
+
+      final int greaterThanNewQuestionLimit = NEW_QUESTION_PICKING_LIMIT + 5;
+      List<Question> questionsAfterPivotDate =
+          QuestionData.questions(greaterThanNewQuestionLimit);
+
+      int lastQuestionIndex = greaterThanNewQuestionLimit - 1;
+      final LocalDateTime oldestCreatedAt =
+          questionsAfterPivotDate.get(lastQuestionIndex).createdAt();
+
+      doReturn(questionsAfterPivotDate)
+          .when(questionRepository).pick20QuestionsCreatedAfter(currentPivotPoint);
+
+      userQuestionManager.pickFor(UserData.TEST_USER_ID);
+
+      assertThat(testUser.pivotPoint()).isNotEqualTo(currentPivotPoint);
+      assertThat(testUser.pivotPoint()).isSameAs(oldestCreatedAt);
+
+      verify(userRepository).save(testUser);
+
+      verifySizeOfSavedNewUserQuestion(greaterThanNewQuestionLimit);
+    }
+
+    private void verifySizeOfSavedNewUserQuestion(int size) {
+      ArgumentCaptor<List<UserQuestion>> captor = ArgumentCaptor.forClass(List.class);
+      verify(userQuestionRepository).saveAll(captor.capture());
+
+      List<UserQuestion> newUserQuestions = captor.getValue();
+      assertThat(newUserQuestions).hasSize(size);
+    }
+
+    @Test
+    void pivotDatesBecomesNowWhenThereAreNotEnoughNewQuestions() {
+      User testUser = UserData.newUser();
+      doReturn(testUser).when(userRepository).getById(testUser.getId());
+
+      LocalDateTime currentPivotPoint = testUser.pivotPoint();
+
+      final int lowerThanEnoughQuestionThreshold = NEW_QUESTION_PICKING_LIMIT - 10;
+      List<Question> questionsAfterPivotDate =
+          QuestionData.questions(lowerThanEnoughQuestionThreshold);
+
+      doReturn(questionsAfterPivotDate)
+          .when(questionRepository).pick20QuestionsCreatedAfter(currentPivotPoint);
+
+      doReturn(fixedTimeAsNow).when(timeProvider).now();
+
+      userQuestionManager.pickFor(testUser.getId());
+
+      assertThat(testUser.pivotPoint()).isEqualTo(fixedTimeAsNow);
+
+      verify(userRepository).save(testUser);
+      verifySizeOfSavedNewUserQuestion(lowerThanEnoughQuestionThreshold);
+    }
+
+    @Test
+    void pivotDateBecomesNowWhenThereIsNoNewQuestion() {
+      User testUser = UserData.newUser();
+      doReturn(testUser).when(userRepository).getById(testUser.getId());
+
+      LocalDateTime currentPivotPoint = testUser.pivotPoint();
+
+      doReturn(Collections.emptyList())
+          .when(questionRepository).pick20QuestionsCreatedAfter(currentPivotPoint);
+
+      doReturn(fixedTimeAsNow).when(timeProvider).now();
+
+      userQuestionManager.pickFor(testUser.getId());
+
+      assertThat(testUser.pivotPoint()).isEqualTo(fixedTimeAsNow);
+
+      verify(userRepository).save(testUser);
+      verifySizeOfSavedNewUserQuestion(0);
+    }
+
+  }
+
+  @Nested
+  class NextForTests {
+
+    @Test
+    void triggersUserQuestionPickingIfUserHasNoNextQuestion() {
+      User testUser = UserData.newUser();
+      doReturn(testUser).when(userRepository).getById(testUser.getId());
+
+      doReturn(Optional.empty()).when(userQuestionRepository).nextFor(testUser.id());
+
+      Optional<PreparedUserQuestion> preparedUserQuestion =
+          userQuestionManager.nextFor(testUser.id());
+
+      assertThat(preparedUserQuestion).isEmpty();
+
+      verifyEventPublished(testUser);
+    }
+
+    private void verifyEventPublished(User testUser) {
+      ArgumentCaptor<AlmostAllUserQuestionsAskedEvent> captor =
+          ArgumentCaptor.forClass(AlmostAllUserQuestionsAskedEvent.class);
+
+      verify(wisitEventPublisher).publishEvent(captor.capture());
+
+      AlmostAllUserQuestionsAskedEvent publishedEvent = captor.getValue();
+
+      assertThat(publishedEvent.getUserId()).isEqualTo(testUser.id());
+    }
+
+    @Test
+    void triggersUserQuestionPickingIfNextQuestionIsNotANewOne() {
+      User testUser = UserData.newUser();
+      doReturn(testUser).when(userRepository).getById(testUser.getId());
+
+      UserQuestion userQuestion = UserQuestionData.newUserQuestionFor(testUser);
+      userQuestion.answer(5);
+
+      doReturn(Optional.of(userQuestion)).when(userQuestionRepository).nextFor(testUser.id());
+
+      Optional<PreparedUserQuestion> preparedUserQuestion =
+          userQuestionManager.nextFor(testUser.id());
+
+      assertThat(preparedUserQuestion).isNotEmpty();
+
+      verifyEventPublished(testUser);
+    }
+
+    @Test
+    void doesNotTriggerUserQuestionPickingIfPreviousPickingForUserWasTooRecently() {
+      User testUser = UserData.newUser();
+      testUser.setPivotPoint(LocalDateTime.now().minusMinutes(15));
+
+      doReturn(testUser).when(userRepository).getById(testUser.getId());
+
+      UserQuestion userQuestion = UserQuestionData.newUserQuestionFor(testUser);
+      userQuestion.answer(5);
+
+      doReturn(Optional.of(userQuestion)).when(userQuestionRepository).nextFor(testUser.id());
+
+      userQuestionManager.nextFor(testUser.id());
+
+      verifyNoInteractions(wisitEventPublisher);
+    }
+  }
+
+  @Nested
+  class AnswerTests {
+
+    @Test
+    void userQuestionIdIsRequired() {
+      User testUser = UserData.newUser();
+
+      AnswerUserQuestion answerUserQuestion = new AnswerUserQuestion();
+
+      assertThatNullPointerException()
+          .isThrownBy(() -> {
+            userQuestionManager.answer(testUser.id(), answerUserQuestion);
+          })
+          .withMessageContaining("required");
+    }
+
+    @Test
+    void updatesUserQuestionAfterBeingAnswering() {
+      User testUser = UserData.newUser();
+      UserQuestion userQuestion = UserQuestionData.newUserQuestionFor(testUser);
+
+      AnswerUserQuestion answerUserQuestion = new AnswerUserQuestion();
+      answerUserQuestion.setUserQuestionId(userQuestion.getId());
+      answerUserQuestion.setCityId(5L);
+
+      doReturn(userQuestion)
+          .when(userQuestionRepository).getByIdAndUserId(userQuestion.getId(), testUser.id());
+
+      userQuestionManager.answer(testUser.id(), answerUserQuestion);
+
+      verify(userQuestionRepository).save(userQuestion);
+    }
+
+  }
+}

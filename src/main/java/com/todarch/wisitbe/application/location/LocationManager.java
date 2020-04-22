@@ -8,7 +8,6 @@ import com.todarch.wisitbe.domain.picture.PictureRepository;
 import com.todarch.wisitbe.infrastructure.rest.errorhandling.DuplicateResourceException;
 import com.todarch.wisitbe.rest.location.AddCityCmd;
 import com.todarch.wisitbe.rest.location.CityDetail;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;

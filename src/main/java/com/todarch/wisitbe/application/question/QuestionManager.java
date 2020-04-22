@@ -7,6 +7,9 @@ import com.todarch.wisitbe.domain.question.Question;
 import com.todarch.wisitbe.domain.question.QuestionRepository;
 import com.todarch.wisitbe.domain.question.UserQuestion;
 import com.todarch.wisitbe.domain.question.UserQuestionRepository;
+import com.todarch.wisitbe.domain.user.User;
+import com.todarch.wisitbe.domain.user.UserRepository;
+import com.todarch.wisitbe.infrastructure.messaging.event.AlmostAllUserQuestionsAskedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.event.QuestionCreatedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.event.UserQuestionAnsweredEvent;
 import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
@@ -40,6 +43,8 @@ public class QuestionManager {
 
   private final UserQuestionRepository userQuestionRepository;
 
+  private final UserRepository userRepository;
+
   /**
    * Creates a question from a picture.
    */
@@ -66,23 +71,29 @@ public class QuestionManager {
   /**
    * Finds the next question for the user if exists.
    */
+  @Deprecated
   public Optional<PreparedUserQuestion> nextFor(String userId) {
+    User user = userRepository.getById(userId);
+
     List<UserQuestion> allQuestionsForUser = userQuestionRepository.findAllByUserId(userId);
 
-    // some of the prepared user questions might be already reported ones
-    // get rid off them here until it becomes a headache
-    while (!allQuestionsForUser.isEmpty()) {
-      int randomIndex = randomIndex(allQuestionsForUser.size());
-      UserQuestion userQuestion = allQuestionsForUser.get(randomIndex);
-      if (userQuestion.getQuestion().isNotActive()) {
-        allQuestionsForUser.remove(randomIndex);
-        userQuestionRepository.delete(userQuestion);
-      } else {
-        return Optional.of(toQuestionWithNoAnswer(userQuestion));
+    int userQuestionCount = allQuestionsForUser.size();
+
+    if (userQuestionCount < 5) {
+      if (user.isEligibleForMoreQuestions()) {
+        AlmostAllUserQuestionsAskedEvent event = new AlmostAllUserQuestionsAskedEvent();
+        event.setUserId(userId);
+        wisitEventPublisher.publishEvent(event);
       }
     }
 
-    return Optional.empty();
+    if (userQuestionCount == 0) {
+      return Optional.empty();
+    }
+
+    int randomIndex = randomIndex(userQuestionCount);
+    UserQuestion userQuestion = allQuestionsForUser.get(randomIndex);
+    return Optional.of(toQuestionWithNoAnswer(userQuestion));
   }
 
   private int randomIndex(int bound) {
@@ -92,10 +103,12 @@ public class QuestionManager {
 
   /**
    * A user answers one of their question.
+   * //TODO: handle the case if user answers a reported/removed user question
    * @param userId who is answering the question
    * @param answerUserQuestion which question is being answered
    * @return the given answer and correct answer
    */
+  @Deprecated
   public UserQuestionAnswer answer(@NonNull String userId,
                                    @NonNull AnswerUserQuestion answerUserQuestion) {
     String userQuestionId = answerUserQuestion.getUserQuestionId();

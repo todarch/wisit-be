@@ -1,17 +1,16 @@
 package com.todarch.wisitbe.infrastructure.messaging.listener;
 
-import static com.todarch.wisitbe.domain.question.UserQuestionFactory.createQuestionForUser;
-
 import com.todarch.wisitbe.application.leaderboard.LeaderboardManager;
 import com.todarch.wisitbe.application.question.QuestionManager;
+import com.todarch.wisitbe.application.question.UserQuestionManager;
 import com.todarch.wisitbe.domain.question.AskedQuestion;
 import com.todarch.wisitbe.domain.question.AskedQuestionFactory;
 import com.todarch.wisitbe.domain.question.AskedQuestionRepository;
 import com.todarch.wisitbe.domain.question.Question;
 import com.todarch.wisitbe.domain.question.QuestionRepository;
-import com.todarch.wisitbe.domain.question.UserQuestion;
 import com.todarch.wisitbe.domain.question.UserQuestionRepository;
 import com.todarch.wisitbe.domain.user.UserRepository;
+import com.todarch.wisitbe.infrastructure.messaging.event.AlmostAllUserQuestionsAskedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.event.PictureCreatedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.event.QuestionCreatedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.event.QuestionReportedEvent;
@@ -20,9 +19,6 @@ import com.todarch.wisitbe.infrastructure.messaging.event.ScoreChangedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.event.UserCreatedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.event.UserQuestionAnsweredEvent;
 import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -48,20 +44,21 @@ public class WisitEventListener {
 
   private final LeaderboardManager leaderboardManager;
 
+  private final UserQuestionManager userQuestionManager;
+
   /**
    * Reacts to new user creation.
    */
   @EventListener
   @Async
   public void onUserCreated(UserCreatedEvent userCreatedEvent) {
-    log.info("tid={} new user created with id: {}", tid(), userCreatedEvent.getUserId());
+    userQuestionManager.pickFor(userCreatedEvent.getUserId());
+  }
 
-    List<UserQuestion> questionsForUser = questionRepository.findAllActive()
-        .stream()
-        .map(question -> createQuestionForUser(userCreatedEvent.getUserId(), question))
-        .collect(Collectors.toList());
-
-    userQuestionRepository.saveAll(questionsForUser);
+  @EventListener
+  @Async
+  public void almostAllUserQuestionsAsked(AlmostAllUserQuestionsAskedEvent event) {
+    userQuestionManager.pickFor(event.getUserId());
   }
 
   /**
@@ -70,22 +67,7 @@ public class WisitEventListener {
   @EventListener
   @Async
   public void onQuestionCreated(QuestionCreatedEvent event) {
-    log.info("tid={}, new question created with id: {}", tid(), event.getQuestionId());
-
-    Optional<Question> optionalQuestion = questionRepository.findById(event.getQuestionId());
-
-    if (optionalQuestion.isEmpty()) {
-      return;
-    }
-
-    Question question = optionalQuestion.get();
-
-    List<UserQuestion> questionForUsers = userRepository.findAll()
-        .stream()
-        .map(user -> createQuestionForUser(user.getId(), question))
-        .collect(Collectors.toList());
-
-    userQuestionRepository.saveAll(questionForUsers);
+    // we will not add this question as a user question for users
   }
 
   /**
@@ -103,7 +85,10 @@ public class WisitEventListener {
               event.isKnew(),
               event.getAnsweredInSeconds());
           askedQuestionRepository.save(askedQuestion);
-          userQuestionRepository.deleteById(userQuestionId);
+
+          if (!userQuestion.canBeAskedAgain()) {
+            userQuestionRepository.deleteById(userQuestionId);
+          }
 
           ScoreChangedEvent scoreChangedEvent = new ScoreChangedEvent();
           scoreChangedEvent.setUsername(getUsername(userQuestion.getUserId()));
@@ -138,10 +123,6 @@ public class WisitEventListener {
     questionManager.createQuestion(createdPicId);
   }
 
-  private long tid() {
-    return Thread.currentThread().getId();
-  }
-
   /**
    * Reacts to a question reporting.
    */
@@ -160,6 +141,7 @@ public class WisitEventListener {
     // could be timing issues such as question is asked, removed, answered
     // maybe we could just disable user questions
     // anyway we do not have to keep them there, we remove them after asking
+    userQuestionManager.removeQuestion(questionId);
   }
 
   /**

@@ -21,6 +21,7 @@ import lombok.NonNull;
 @Table(name = "questions")
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // for hibernate
+@Getter
 public class Question {
 
   @Id

@@ -1,6 +1,7 @@
 package com.todarch.wisitbe.rest.question;
 
 import com.todarch.wisitbe.application.question.QuestionManager;
+import com.todarch.wisitbe.application.question.UserQuestionManager;
 import com.todarch.wisitbe.infrastructure.security.CurrentUser;
 import com.todarch.wisitbe.infrastructure.security.CurrentUserProvider;
 import lombok.AllArgsConstructor;
@@ -23,6 +24,8 @@ public class QuestionResource {
 
   private final CurrentUserProvider currentUserProvider;
 
+  private final UserQuestionManager userQuestionManager;
+
   /**
    * Returns the next question for the current user.
    */
@@ -30,7 +33,8 @@ public class QuestionResource {
   public ResponseEntity<PreparedUserQuestion> nextQuestion() {
     CurrentUser currentUser = currentUserProvider.currentUser();
     currentUser.requirePickedUsername();
-    var optionalQuestion = questionManager.nextFor(currentUser.id());
+
+    var optionalQuestion = userQuestionManager.nextFor(currentUser.id());
     if (optionalQuestion.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
@@ -56,8 +60,9 @@ public class QuestionResource {
   public ResponseEntity<UserQuestionAnswer> answerQuestion(@RequestBody AnswerUserQuestion answer) {
     CurrentUser currentUser = currentUserProvider.currentUser();
     currentUser.requirePickedUsername();
+
     UserQuestionAnswer userQuestionAnswer =
-        questionManager.answer(currentUser.id(), answer);
+        userQuestionManager.answer(currentUser.id(), answer);
 
     return ResponseEntity.ok(userQuestionAnswer);
   }

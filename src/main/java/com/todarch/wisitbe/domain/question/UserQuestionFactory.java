@@ -18,6 +18,7 @@ public final class UserQuestionFactory {
     userQuestion.setId(UUID.randomUUID().toString());
     userQuestion.setUserId(userId);
     userQuestion.setQuestion(question);
+    userQuestion.setWeight(UserQuestion.DEFAULT_WEIGHT);
     return userQuestion;
   }
 }
