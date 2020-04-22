@@ -12,4 +12,5 @@ public class PreparedUserQuestion {
   private String picUrl;
   private Set<City> choices;
   private LocalDateTime createdAt;
+  private long answeredCount;
 }

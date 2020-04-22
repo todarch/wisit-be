@@ -28,7 +28,7 @@ public class Question {
   @Getter
   private String id;
 
-  @OneToOne(cascade = CascadeType.MERGE)
+  @OneToOne(cascade = { CascadeType.MERGE, CascadeType.PERSIST })
   @JoinColumn(name = "pic_id", referencedColumnName = "id")
   private Picture picture;
 

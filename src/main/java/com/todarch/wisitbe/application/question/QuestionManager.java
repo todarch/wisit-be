@@ -3,6 +3,7 @@ package com.todarch.wisitbe.application.question;
 import com.todarch.wisitbe.application.location.LocationManager;
 import com.todarch.wisitbe.domain.picture.Picture;
 import com.todarch.wisitbe.domain.picture.PictureRepository;
+import com.todarch.wisitbe.domain.question.AskedQuestionRepository;
 import com.todarch.wisitbe.domain.question.Question;
 import com.todarch.wisitbe.domain.question.QuestionRepository;
 import com.todarch.wisitbe.infrastructure.messaging.event.QuestionCreatedEvent;
@@ -26,6 +27,8 @@ public class QuestionManager {
   private final PictureRepository pictureRepository;
 
   private final WisitEventPublisher wisitEventPublisher;
+
+  private final AskedQuestionRepository askedQuestionRepository;
 
   /**
    * Creates a question from a picture.
@@ -61,5 +64,9 @@ public class QuestionManager {
     preparedQuestion.setChoices(locationManager.toCityNames(question.choices()));
     preparedQuestion.setChoiceCityIds(question.choices());
     return preparedQuestion;
+  }
+
+  public long answeredCount(String questionId) {
+    return askedQuestionRepository.countByQuestionId(questionId);
   }
 }

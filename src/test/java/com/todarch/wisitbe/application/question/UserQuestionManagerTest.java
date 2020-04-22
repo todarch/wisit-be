@@ -28,7 +28,6 @@ import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -58,6 +57,9 @@ class UserQuestionManagerTest {
 
   @Mock
   private LocationManager locationManager;
+
+  @Mock
+  private QuestionManager questionManager;
 
   @InjectMocks
   private UserQuestionManager userQuestionManager;

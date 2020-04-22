@@ -41,6 +41,8 @@ public class UserQuestionManager {
 
   private final LocationManager locationManager;
 
+  private final QuestionManager questionManager;
+
   /**
    * Picks new questions for the user.
    */
@@ -115,6 +117,7 @@ public class UserQuestionManager {
     preparedUserQuestion.setPicUrl(question.pictureUrl());
     preparedUserQuestion.setCreatedAt(question.createdAt());
     preparedUserQuestion.setChoices(locationManager.toCities(question.choices()));
+    preparedUserQuestion.setAnsweredCount(questionManager.answeredCount(question.getId()));
     return preparedUserQuestion;
   }
 
