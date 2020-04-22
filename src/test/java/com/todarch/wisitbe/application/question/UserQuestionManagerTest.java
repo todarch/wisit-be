@@ -90,7 +90,7 @@ class UserQuestionManagerTest {
       doReturn(questionsAfterPivotDate)
           .when(questionRepository).pick20QuestionsCreatedAfter(currentPivotPoint);
 
-      userQuestionManager.pickFor(UserData.TEST_USER_ID);
+      userQuestionManager.pickFor(testUser.id());
 
       assertThat(testUser.pivotPoint()).isNotEqualTo(currentPivotPoint);
       assertThat(testUser.pivotPoint()).isSameAs(oldestCreatedAt);
