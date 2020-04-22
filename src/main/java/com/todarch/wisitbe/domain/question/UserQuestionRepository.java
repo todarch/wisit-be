@@ -5,14 +5,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional(readOnly = true)
 public interface UserQuestionRepository extends JpaRepository<UserQuestion, String> {
   List<UserQuestion> findAllByUserId(String userId);
 
+  @Transactional
   default void deleteAllByQuestionId(String questionId) {
     deleteAllByQuestion_Id(questionId);
   }
 
+  @Transactional
   void deleteAllByQuestion_Id(String questionId);
 
   /**

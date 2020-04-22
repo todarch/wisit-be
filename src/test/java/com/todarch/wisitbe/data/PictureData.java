@@ -7,7 +7,7 @@ class PictureData {
 
   static Picture newPicture() {
     Picture picture = new Picture();
-    picture.setId(ThreadLocalRandom.current().nextLong());
+    // picture.setId(ThreadLocalRandom.current().nextLong(Long.MAX_VALUE));
     picture.setCityId(63L);
     picture.setUrl("TEST_PIC_URL");
     picture.setActive(true);
