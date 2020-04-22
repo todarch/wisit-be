@@ -4,6 +4,7 @@ plugins {
   id 'java'
   id 'com.google.cloud.tools.jib' version '2.1.0'
   id 'checkstyle'
+  id "org.flywaydb.flyway" version "6.4.0"
 }
 
 group = 'com.todarch'
@@ -14,6 +15,13 @@ checkstyle {
   toolVersion = '8.31'
   ignoreFailures = false
   maxWarnings = 0
+}
+
+flyway {
+  url = 'jdbc:postgresql://localhost:5445/admin'
+  user = 'admin'
+  password = 'admin'
+  schemas = ['wisit']
 }
 
 configurations {
