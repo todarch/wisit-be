@@ -29,7 +29,6 @@ public class UserResource {
   @GetMapping("/profile")
   public ResponseEntity<UserProfile> currentUserProfile() {
     CurrentUser currentUser = currentUserProvider.currentUser();
-    currentUser.requirePickedUsername();
     UserProfile profile = userManager.profile(currentUser.id());
     return ResponseEntity.ok(profile);
   }

@@ -7,7 +7,6 @@ import com.todarch.wisitbe.infrastructure.security.CurrentUserProvider;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 import javax.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,19 +23,6 @@ public class DummyController {
   private final CurrentUserProvider currentUserProvider;
 
   private final UserRepository userRepository;
-
-  /**
-   * Makes it easy to be treated like a new registered user.
-   */
-  @GetMapping("/swap-me")
-  public void swapMe() {
-    CurrentUser currentUser = currentUserProvider.currentUser();
-    userRepository.findById(currentUser.id())
-        .ifPresent(user -> {
-          user.setIp("swapped" + ThreadLocalRandom.current().nextLong(1000000));
-          userRepository.saveAndFlush(user);
-        });
-  }
 
   /**
    * Sends back information comes with the request.

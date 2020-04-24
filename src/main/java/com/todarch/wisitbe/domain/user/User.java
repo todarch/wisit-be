@@ -35,7 +35,7 @@ public class User {
   @Column
   private String userAgent;
 
-  @Column(length = 100, nullable = false)
+  @Column(length = 100, nullable = false, updatable = false)
   private String username;
 
   private LocalDateTime pivotPoint;
@@ -45,36 +45,20 @@ public class User {
    */
   public void setId(@NonNull String userId) {
     this.id = userId;
-    this.username = userId;
   }
 
   /**
    * Sets username for this user if already not set it once.
    */
   public void setUsername(@NonNull String username) {
-    if (this.username.equals(username)) {
-      return;
-    }
-
-    if (!didPickedUsername()) {
-      this.username = username;
-    } else {
+    if (alreadyHasUsername()) {
       throw new CannotChangeUserNameException("User cannot change username anymore.");
     }
+    this.username = username;
   }
 
-  private boolean didPickedUsername() {
-    return !id.equals(username);
-  }
-
-  /**
-   * Returns username if user has already picked one.
-   */
-  public Optional<String> pickedUsername() {
-    if (didPickedUsername()) {
-      return Optional.of(username);
-    }
-    return Optional.empty();
+  private boolean alreadyHasUsername() {
+    return username != null;
   }
 
   public LocalDateTime pivotPoint() {
@@ -88,5 +72,9 @@ public class User {
 
   public boolean isEligibleForMoreQuestions() {
     return LocalDateTime.now().minusHours(1).isAfter(pivotPoint());
+  }
+
+  public String username() {
+    return username;
   }
 }

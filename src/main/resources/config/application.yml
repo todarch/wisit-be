@@ -36,3 +36,18 @@ wisit:
       api-base-url: "https://www.flickr.com/services/rest/"
       api-key: "${FLICKR_API_KEY}"
 
+
+keycloak:
+  realm: todarch
+  auth-server-url: ${AUTH_SERVER_URL}
+  public-client: true
+  resource: wisit-app
+  bearer-only: true
+  ssl-required: none
+  security-constraints:
+    - authRoles:
+        - user
+      securityCollections:
+        - patterns:
+            - /api/protected/*
+  cors: true

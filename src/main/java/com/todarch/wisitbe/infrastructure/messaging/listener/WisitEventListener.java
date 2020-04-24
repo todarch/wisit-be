@@ -9,6 +9,7 @@ import com.todarch.wisitbe.domain.question.AskedQuestionRepository;
 import com.todarch.wisitbe.domain.question.Question;
 import com.todarch.wisitbe.domain.question.QuestionRepository;
 import com.todarch.wisitbe.domain.question.UserQuestionRepository;
+import com.todarch.wisitbe.domain.user.User;
 import com.todarch.wisitbe.domain.user.UserRepository;
 import com.todarch.wisitbe.infrastructure.messaging.event.AlmostAllUserQuestionsAskedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.event.PictureCreatedEvent;
@@ -90,17 +91,13 @@ public class WisitEventListener {
             userQuestionRepository.deleteById(userQuestionId);
           }
 
+          User user = userRepository.getById(userQuestion.getUserId());
+
           ScoreChangedEvent scoreChangedEvent = new ScoreChangedEvent();
-          scoreChangedEvent.setUsername(getUsername(userQuestion.getUserId()));
+          scoreChangedEvent.setUsername(user.username());
           scoreChangedEvent.setDelta(event.isKnew() ? 10 : -5);
           wisitEventPublisher.publishEvent(scoreChangedEvent);
         });
-  }
-
-  private String getUsername(String userId) {
-    // user cannot answer a question if haven't picked a username
-    // at this point, we are sure that we have picked username
-    return userRepository.findById(userId).get().pickedUsername().get();
   }
 
   /**
