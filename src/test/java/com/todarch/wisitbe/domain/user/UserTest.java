@@ -7,6 +7,14 @@ import org.junit.jupiter.api.Test;
 class UserTest {
 
   @Test
+  void cannotChangeUsername() {
+    User user = new User();
+    user.setUsername("first-time");
+    Assertions.assertThatThrownBy(() -> user.setUsername("second-time"))
+        .isInstanceOf(CannotChangeUserNameException.class);
+  }
+
+  @Test
   void providesDefaultValueAsMinForPivotDateIfNull() {
     User user = new User();
     Assertions.assertThat(user.pivotPoint()).isEqualTo(User.MIN_CREATED_AT_VALUE);

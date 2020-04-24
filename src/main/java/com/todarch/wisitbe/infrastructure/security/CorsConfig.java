@@ -1,7 +1,5 @@
-package com.todarch.wisitbe.infrastructure.rest;
+package com.todarch.wisitbe.infrastructure.security;
 
-import java.util.Arrays;
-import java.util.Collections;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -12,17 +10,17 @@ import org.springframework.web.filter.CorsFilter;
 public class CorsConfig {
 
   /**
-   * Allows all methods, headers and origins for now.
+   * Configures cors filter.
    */
   @Bean
   public CorsFilter corsFilter() {
     final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     final CorsConfiguration config = new CorsConfiguration();
-    config.setAllowCredentials(true);
-    // Don't do this in production, use a proper list  of allowed origins
-    config.setAllowedOrigins(Collections.singletonList("*"));
-    config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept"));
-    config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "OPTIONS", "DELETE", "PATCH"));
+    // config.setAllowCredentials(true);
+    //TODO:selimssevgi: don't do this in production, use a proper list  of allowed origins
+    config.addAllowedOrigin(CorsConfiguration.ALL);
+    config.addAllowedHeader(CorsConfiguration.ALL);
+    config.addAllowedMethod(CorsConfiguration.ALL);
     source.registerCorsConfiguration("/**", config);
     return new CorsFilter(source);
   }
