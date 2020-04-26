@@ -7,6 +7,7 @@ import com.todarch.wisitbe.domain.leaderboard.LeaderboardItem;
 import com.todarch.wisitbe.domain.leaderboard.LeaderboardType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import lombok.NonNull;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -61,5 +62,34 @@ public class LeaderboardManager {
     leaderboardTypes.forEach(leaderboardType -> {
       sortedSetOperations.removeRange(leaderboardType.key(), MIN_VALUE, MAX_VALUE);
     });
+  }
+
+  /**
+   * Provides access to a single user's scores.
+   */
+  public UserScores userScores(String username) {
+    UserScores userScores = new UserScores();
+    userScores.setDaily(dailyScoreOf(username));
+    userScores.setWeekly(weeklyScoreOf(username));
+    userScores.setMonthly(monthlyScoreOf(username));
+    return userScores;
+  }
+
+  private long dailyScoreOf(String username) {
+    return defaultToZero(sortedSetOperations.score(LeaderboardType.DAILY.key(), username));
+  }
+
+  private long defaultToZero(Double score) {
+    return Optional.ofNullable(score)
+        .map(Double::longValue)
+        .orElse(0L);
+  }
+
+  private long weeklyScoreOf(String username) {
+    return defaultToZero(sortedSetOperations.score(LeaderboardType.WEEKLY.key(), username));
+  }
+
+  private long monthlyScoreOf(String username) {
+    return defaultToZero(sortedSetOperations.score(LeaderboardType.MONTHLY.key(), username));
   }
 }
