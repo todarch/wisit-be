@@ -5,6 +5,7 @@ import com.todarch.wisitbe.domain.question.Question;
 import com.todarch.wisitbe.domain.question.QuestionRepository;
 import com.todarch.wisitbe.domain.question.UserQuestion;
 import com.todarch.wisitbe.domain.question.UserQuestionFactory;
+import com.todarch.wisitbe.domain.question.UserQuestionPickingSpecification;
 import com.todarch.wisitbe.domain.question.UserQuestionRepository;
 import com.todarch.wisitbe.domain.user.User;
 import com.todarch.wisitbe.domain.user.UserRepository;
@@ -42,6 +43,8 @@ public class UserQuestionManager {
   private final LocationManager locationManager;
 
   private final QuestionManager questionManager;
+
+  private final UserQuestionPickingSpecification userQuestionPickingSpecification;
 
   /**
    * Picks new questions for the user.
@@ -85,26 +88,27 @@ public class UserQuestionManager {
 
   /**
    * Gets next question for the user.
+   * @deprecated instead of requesting single question, use nextBatchFor for multiple
    */
+  @Deprecated(forRemoval = true)
   public Optional<PreparedUserQuestion> nextFor(String userId) {
     User user = userRepository.getById(userId);
 
     Optional<UserQuestion> optionalNextQuestion = userQuestionRepository.nextFor(userId);
 
-    if (optionalNextQuestion.isEmpty()) {
+    List<UserQuestion> toList = optionalNextQuestion.map(List::of).orElse(List.of());
+
+    if (userQuestionPickingSpecification.isSatisfiedBy(user, toList)) {
       AlmostAllUserQuestionsAskedEvent event = new AlmostAllUserQuestionsAskedEvent();
       event.setUserId(userId);
       wisitEventPublisher.publishEvent(event);
+    }
+
+    if (toList.isEmpty()) {
       return Optional.empty();
     }
 
-    UserQuestion userQuestion = optionalNextQuestion.get();
-
-    if (!userQuestion.isNew() && user.isEligibleForMoreQuestions()) {
-      AlmostAllUserQuestionsAskedEvent event = new AlmostAllUserQuestionsAskedEvent();
-      event.setUserId(userId);
-      wisitEventPublisher.publishEvent(event);
-    }
+    UserQuestion userQuestion = toList.get(0);
 
     return Optional.of(toQuestionWithNoAnswer(userQuestion));
   }
@@ -152,5 +156,25 @@ public class UserQuestionManager {
     wisitEventPublisher.publishEvent(userQuestionAnsweredEvent);
 
     return userQuestionAnswer;
+  }
+
+  /**
+   * Provides next batch of questions for user.
+   */
+  public List<PreparedUserQuestion> nextBatchFor(@NonNull String userId) {
+    User user = userRepository.getById(userId);
+
+    List<UserQuestion> nextQuestions = userQuestionRepository.next10(user.id());
+
+    if (userQuestionPickingSpecification.isSatisfiedBy(user, nextQuestions)) {
+      AlmostAllUserQuestionsAskedEvent event = new AlmostAllUserQuestionsAskedEvent();
+      event.setUserId(userId);
+      wisitEventPublisher.publishEvent(event);
+    }
+
+    return nextQuestions
+        .stream()
+        .map(this::toQuestionWithNoAnswer)
+        .collect(Collectors.toList());
   }
 }

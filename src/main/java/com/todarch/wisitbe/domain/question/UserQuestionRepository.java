@@ -38,6 +38,10 @@ public interface UserQuestionRepository extends JpaRepository<UserQuestion, Stri
   // most recently asked one should be asked first
   List<UserQuestion> findTop10ByUserIdOrderByWeightDescLastAskedAtDesc(String userId);
 
+  default List<UserQuestion> next10(String userId) {
+    return findTop10ByUserIdOrderByWeightDescLastAskedAtDesc(userId);
+  }
+
   /**
    * Gets user question by id and user id.
    */

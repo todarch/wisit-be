@@ -14,6 +14,7 @@ import com.todarch.wisitbe.data.UserQuestionData;
 import com.todarch.wisitbe.domain.question.Question;
 import com.todarch.wisitbe.domain.question.QuestionRepository;
 import com.todarch.wisitbe.domain.question.UserQuestion;
+import com.todarch.wisitbe.domain.question.UserQuestionPickingSpecification;
 import com.todarch.wisitbe.domain.question.UserQuestionRepository;
 import com.todarch.wisitbe.domain.user.User;
 import com.todarch.wisitbe.domain.user.UserRepository;
@@ -60,6 +61,9 @@ class UserQuestionManagerTest {
 
   @Mock
   private QuestionManager questionManager;
+
+  @Mock
+  private UserQuestionPickingSpecification userQuestionPickingSpecification;
 
   @InjectMocks
   private UserQuestionManager userQuestionManager;
@@ -160,9 +164,12 @@ class UserQuestionManagerTest {
   class NextForTests {
 
     @Test
-    void triggersUserQuestionPickingIfUserHasNoNextQuestion() {
+    void publishesEventForNewQuestionIfPickingSpecificationIsSatisfied() {
       User testUser = UserData.newUser();
       doReturn(testUser).when(userRepository).getById(testUser.getId());
+
+      doReturn(true)
+          .when(userQuestionPickingSpecification).isSatisfiedBy(testUser, List.of());
 
       doReturn(Optional.empty()).when(userQuestionRepository).nextFor(testUser.id());
 
@@ -171,53 +178,52 @@ class UserQuestionManagerTest {
 
       assertThat(preparedUserQuestion).isEmpty();
 
+      verify(userQuestionPickingSpecification).isSatisfiedBy(testUser, List.of());
+      verifyEventPublished(testUser);
+    }
+  }
+
+  private void verifyEventPublished(User testUser) {
+    ArgumentCaptor<AlmostAllUserQuestionsAskedEvent> captor =
+        ArgumentCaptor.forClass(AlmostAllUserQuestionsAskedEvent.class);
+
+    verify(wisitEventPublisher).publishEvent(captor.capture());
+
+    AlmostAllUserQuestionsAskedEvent publishedEvent = captor.getValue();
+
+    assertThat(publishedEvent.getUserId()).isEqualTo(testUser.id());
+  }
+
+  @Nested
+  class NextBatchForTests {
+
+    @Test
+    void publishesEventForNewQuestionIfPickingSpecificationIsSatisfied() {
+      User testUser = UserData.newUser();
+      doReturn(testUser).when(userRepository).getById(testUser.getId());
+
+      doReturn(true)
+          .when(userQuestionPickingSpecification).isSatisfiedBy(testUser, List.of());
+
+      doReturn(List.of()).when(userQuestionRepository).next10(testUser.id());
+
+      userQuestionManager.nextBatchFor(testUser.id());
+
       verifyEventPublished(testUser);
     }
 
-    private void verifyEventPublished(User testUser) {
-      ArgumentCaptor<AlmostAllUserQuestionsAskedEvent> captor =
-          ArgumentCaptor.forClass(AlmostAllUserQuestionsAskedEvent.class);
-
-      verify(wisitEventPublisher).publishEvent(captor.capture());
-
-      AlmostAllUserQuestionsAskedEvent publishedEvent = captor.getValue();
-
-      assertThat(publishedEvent.getUserId()).isEqualTo(testUser.id());
-    }
-
     @Test
-    void triggersUserQuestionPickingIfNextQuestionIsNotANewOne() {
+    void preparesAtLeast10NextQuestionsForUser() {
       User testUser = UserData.newUser();
       doReturn(testUser).when(userRepository).getById(testUser.getId());
 
       UserQuestion userQuestion = UserQuestionData.newUserQuestionFor(testUser);
-      userQuestion.answer(5);
+      doReturn(List.of(userQuestion)).when(userQuestionRepository).next10(testUser.id());
 
-      doReturn(Optional.of(userQuestion)).when(userQuestionRepository).nextFor(testUser.id());
+      List<PreparedUserQuestion> preparedUserQuestions =
+          userQuestionManager.nextBatchFor(testUser.id());
 
-      Optional<PreparedUserQuestion> preparedUserQuestion =
-          userQuestionManager.nextFor(testUser.id());
-
-      assertThat(preparedUserQuestion).isNotEmpty();
-
-      verifyEventPublished(testUser);
-    }
-
-    @Test
-    void doesNotTriggerUserQuestionPickingIfPreviousPickingForUserWasTooRecently() {
-      User testUser = UserData.newUser();
-      testUser.setPivotPoint(LocalDateTime.now().minusMinutes(15));
-
-      doReturn(testUser).when(userRepository).getById(testUser.getId());
-
-      UserQuestion userQuestion = UserQuestionData.newUserQuestionFor(testUser);
-      userQuestion.answer(5);
-
-      doReturn(Optional.of(userQuestion)).when(userQuestionRepository).nextFor(testUser.id());
-
-      userQuestionManager.nextFor(testUser.id());
-
-      verifyNoInteractions(wisitEventPublisher);
+      assertThat(preparedUserQuestions).hasSize(1);
     }
   }
 
