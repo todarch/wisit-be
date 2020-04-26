@@ -10,4 +10,8 @@ public class CurrentUser {
   public String id() {
     return this.user.getId();
   }
+
+  public String username() {
+    return this.user.username();
+  }
 }
