@@ -14,7 +14,9 @@ import com.todarch.wisitbe.infrastructure.messaging.event.UserQuestionAnsweredEv
 import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
 import com.todarch.wisitbe.infrastructure.provider.TimeProvider;
 import com.todarch.wisitbe.rest.question.AnswerUserQuestion;
+import com.todarch.wisitbe.rest.question.PreparedQuestion;
 import com.todarch.wisitbe.rest.question.PreparedUserQuestion;
+import com.todarch.wisitbe.rest.question.QuestionAnswer;
 import com.todarch.wisitbe.rest.question.UserQuestionAnswer;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -114,14 +116,12 @@ public class UserQuestionManager {
   }
 
   private PreparedUserQuestion toQuestionWithNoAnswer(UserQuestion userQuestion) {
-    Question question = userQuestion.getQuestion();
+    PreparedQuestion preparedQuestion =
+        questionManager.toQuestionWithNoAnswer(userQuestion.getQuestion());
+
     PreparedUserQuestion preparedUserQuestion = new PreparedUserQuestion();
-    preparedUserQuestion.setQuestionId(question.getId());
+    preparedUserQuestion.setPreparedQuestion(preparedQuestion);
     preparedUserQuestion.setUserQuestionId(userQuestion.getId());
-    preparedUserQuestion.setPicUrl(question.pictureUrl());
-    preparedUserQuestion.setCreatedAt(question.createdAt());
-    preparedUserQuestion.setChoices(locationManager.toCities(question.choices()));
-    preparedUserQuestion.setAnsweredCount(questionManager.answeredCount(question.getId()));
     return preparedUserQuestion;
   }
 
@@ -143,14 +143,17 @@ public class UserQuestionManager {
 
     userQuestionRepository.save(userQuestion);
 
+    QuestionAnswer questionAnswer =
+        questionManager.toQuestionAnswer(
+            userQuestion.getQuestion(),
+            answerUserQuestion.getCityId());
+
     UserQuestionAnswer userQuestionAnswer = new UserQuestionAnswer();
     userQuestionAnswer.setUserQuestionId(userQuestion.getId());
-    userQuestionAnswer.setCorrectCity(locationManager.getCityById(userQuestion.correctAnswer()));
-    userQuestionAnswer.setGivenCity(locationManager.getCityById(answerUserQuestion.getCityId()));
-    userQuestionAnswer.setKnew(knew);
+    userQuestionAnswer.setQuestionAnswer(questionAnswer);
 
     UserQuestionAnsweredEvent userQuestionAnsweredEvent = new UserQuestionAnsweredEvent();
-    userQuestionAnsweredEvent.setKnew(userQuestionAnswer.isKnew());
+    userQuestionAnsweredEvent.setKnew(knew);
     userQuestionAnsweredEvent.setUserQuestionId(userQuestionAnswer.getUserQuestionId());
     userQuestionAnsweredEvent.setAnsweredInSeconds(answerUserQuestion.getAnsweredInSeconds());
     wisitEventPublisher.publishEvent(userQuestionAnsweredEvent);

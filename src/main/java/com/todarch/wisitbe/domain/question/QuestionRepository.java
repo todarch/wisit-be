@@ -24,5 +24,8 @@ public interface QuestionRepository extends JpaRepository<Question, String> {
 
   List<Question> findAllByActive(boolean active);
 
+  default Question getById(String id) {
+    return findById(id).orElseThrow(() -> new ResourceNotFoundException("Question not found"));
+  }
 
 }

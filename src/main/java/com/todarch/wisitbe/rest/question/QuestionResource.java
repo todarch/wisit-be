@@ -1,9 +1,6 @@
 package com.todarch.wisitbe.rest.question;
 
 import com.todarch.wisitbe.application.question.QuestionManager;
-import com.todarch.wisitbe.application.question.UserQuestionManager;
-import com.todarch.wisitbe.infrastructure.security.CurrentUser;
-import com.todarch.wisitbe.infrastructure.security.CurrentUserProvider;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -15,25 +12,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/protected/questions")
+@RequestMapping("/api/questions")
 @AllArgsConstructor
 @Slf4j
 public class QuestionResource {
 
   private final QuestionManager questionManager;
 
-  private final CurrentUserProvider currentUserProvider;
-
-  private final UserQuestionManager userQuestionManager;
-
   /**
-   * Returns the next question for the current user.
+   * Returns the a random question for the guest user.
    */
-  @GetMapping("/next")
-  public ResponseEntity<PreparedUserQuestion> nextQuestion() {
-    CurrentUser currentUser = currentUserProvider.currentUser();
+  @GetMapping("/random")
+  public ResponseEntity<PreparedQuestion> nextQuestion() {
+    var optionalQuestion = questionManager.randomQuestion();
 
-    var optionalQuestion = userQuestionManager.nextFor(currentUser.id());
     if (optionalQuestion.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
@@ -53,16 +45,14 @@ public class QuestionResource {
   }
 
   /**
-   * Lets user answer one of their question and got feedback about the same question.
+   * Answers a question.
    */
   @PostMapping("/answer")
-  public ResponseEntity<UserQuestionAnswer> answerQuestion(@RequestBody AnswerUserQuestion answer) {
-    CurrentUser currentUser = currentUserProvider.currentUser();
+  public ResponseEntity<QuestionAnswer> answerQuestion(@RequestBody AnswerQuestion answer) {
 
-    UserQuestionAnswer userQuestionAnswer =
-        userQuestionManager.answer(currentUser.id(), answer);
+    QuestionAnswer questionAnswer = questionManager.answer(answer);
 
-    return ResponseEntity.ok(userQuestionAnswer);
+    return ResponseEntity.ok(questionAnswer);
   }
 
 }

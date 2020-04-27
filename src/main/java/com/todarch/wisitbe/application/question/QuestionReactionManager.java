@@ -52,9 +52,7 @@ public class QuestionReactionManager {
    * Collects statistics on a question together with user's reaction.
    */
   public QuestionReactionStats stats(String userId, String questionId) {
-    QuestionReactionStats stats = new QuestionReactionStats();
-    stats.setLikes(questionReactionRepository.countLikesByQuestionId(questionId));
-    stats.setDislikes(questionReactionRepository.countDislikesByQuestionId(questionId));
+    QuestionReactionStats stats = questionStats(questionId);
 
     questionReactionRepository.findByUserIdAndQuestionId(userId, questionId)
         .ifPresent(questionReaction -> {
@@ -62,6 +60,23 @@ public class QuestionReactionManager {
           stats.setDisliked(!questionReaction.liked());
         });
 
+    return stats;
+  }
+
+  /**
+   * Gathers stats without taking into account current user.
+   */
+  public QuestionReactionStats stats(String questionId) {
+    QuestionReactionStats stats = questionStats(questionId);
+    stats.setLiked(false);
+    stats.setDisliked(false);
+    return stats;
+  }
+
+  private QuestionReactionStats questionStats(String questionId) {
+    QuestionReactionStats stats = new QuestionReactionStats();
+    stats.setLikes(questionReactionRepository.countLikesByQuestionId(questionId));
+    stats.setDislikes(questionReactionRepository.countDislikesByQuestionId(questionId));
     return stats;
   }
 }

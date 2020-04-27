@@ -9,11 +9,17 @@ import com.todarch.wisitbe.domain.question.QuestionRepository;
 import com.todarch.wisitbe.infrastructure.messaging.event.QuestionCreatedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
 import com.todarch.wisitbe.infrastructure.rest.errorhandling.ResourceNotFoundException;
+import com.todarch.wisitbe.rest.question.AnswerQuestion;
 import com.todarch.wisitbe.rest.question.PreparedQuestion;
+import com.todarch.wisitbe.rest.question.QuestionAnswer;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -56,17 +62,43 @@ public class QuestionManager {
         .map(this::toQuestionWithNoAnswer);
   }
 
-  private PreparedQuestion toQuestionWithNoAnswer(Question question) {
+  PreparedQuestion toQuestionWithNoAnswer(Question question) {
     PreparedQuestion preparedQuestion = new PreparedQuestion();
     preparedQuestion.setQuestionId(question.getId());
     preparedQuestion.setPicUrl(question.pictureUrl());
     preparedQuestion.setCreatedAt(question.createdAt());
-    preparedQuestion.setChoices(locationManager.toCityNames(question.choices()));
-    preparedQuestion.setChoiceCityIds(question.choices());
+    preparedQuestion.setChoices(locationManager.toCities(question.choices()));
+    preparedQuestion.setAnsweredCount(answeredCount(question.getId()));
     return preparedQuestion;
   }
 
-  public long answeredCount(String questionId) {
+  private long answeredCount(String questionId) {
     return askedQuestionRepository.countByQuestionId(questionId);
+  }
+
+  /**
+   * Gets a random question among existing ones.
+   */
+  public Optional<PreparedQuestion> randomQuestion() {
+    long qty = questionRepository.count();
+    int idx = ThreadLocalRandom.current().nextInt((int) qty);
+    Page<Question> questionPage = questionRepository.findAll(PageRequest.of(idx, 1));
+    return Optional.of(questionPage)
+        .filter(Page::hasContent)
+        .map(page -> page.getContent().get(0))
+        .map(this::toQuestionWithNoAnswer);
+  }
+
+  public QuestionAnswer answer(@NonNull AnswerQuestion answer) {
+    Question question = questionRepository.getById(answer.getQuestionId());
+    return toQuestionAnswer(question, answer.getCityId());
+  }
+
+  QuestionAnswer toQuestionAnswer(Question question, long givenCityId) {
+    QuestionAnswer questionAnswer = new QuestionAnswer();
+    questionAnswer.setCorrectCity(locationManager.getCityById(question.answerCityId()));
+    questionAnswer.setGivenCity(locationManager.getCityById(givenCityId));
+    questionAnswer.setKnew(question.isCorrectAnswer(givenCityId));
+    return questionAnswer;
   }
 }
