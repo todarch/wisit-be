@@ -84,7 +84,8 @@ public class WisitEventListener {
           AskedQuestion askedQuestion = AskedQuestionFactory.create(
               userQuestion,
               event.isKnew(),
-              event.getAnsweredInSeconds());
+              event.getAnsweredInSeconds(),
+              event.getScoreDelta());
           askedQuestionRepository.save(askedQuestion);
 
           if (!userQuestion.canBeAskedAgain()) {
@@ -95,7 +96,7 @@ public class WisitEventListener {
 
           ScoreChangedEvent scoreChangedEvent = new ScoreChangedEvent();
           scoreChangedEvent.setUsername(user.username());
-          scoreChangedEvent.setDelta(event.isKnew() ? 10 : -5);
+          scoreChangedEvent.setDelta(event.getScoreDelta());
           wisitEventPublisher.publishEvent(scoreChangedEvent);
         });
   }

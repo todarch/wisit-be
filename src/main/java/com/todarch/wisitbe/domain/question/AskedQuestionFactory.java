@@ -11,12 +11,14 @@ public final class AskedQuestionFactory {
    */
   public static AskedQuestion create(UserQuestion userQuestion,
                                      boolean knew,
-                                     long answeredInSeconds) {
+                                     long answeredInSeconds,
+                                     int scoreDelta) {
     AskedQuestion askedQuestion = new AskedQuestion();
     askedQuestion.setUserId(userQuestion.getUserId());
     askedQuestion.setQuestionId(userQuestion.getQuestion().getId());
     askedQuestion.setKnew(knew);
     askedQuestion.setAnsweredInSeconds(answeredInSeconds);
+    askedQuestion.setScoreDelta(scoreDelta);
     return askedQuestion;
   }
 }

@@ -156,6 +156,7 @@ public class UserQuestionManager {
     userQuestionAnsweredEvent.setKnew(knew);
     userQuestionAnsweredEvent.setUserQuestionId(userQuestionAnswer.getUserQuestionId());
     userQuestionAnsweredEvent.setAnsweredInSeconds(answerUserQuestion.getAnsweredInSeconds());
+    userQuestionAnsweredEvent.setScoreDelta(questionAnswer.getScoreDelta());
     wisitEventPublisher.publishEvent(userQuestionAnsweredEvent);
 
     return userQuestionAnswer;

@@ -36,5 +36,8 @@ public class AskedQuestion {
   private long answeredInSeconds = 0;
 
   @Column
+  private int scoreDelta;
+
+  @Column
   private LocalDateTime createdAt;
 }

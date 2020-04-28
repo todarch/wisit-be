@@ -32,8 +32,11 @@ class AskedQuestionRepositoryTest {
     UserQuestion anotherUserQuestion =
         UserQuestionFactory.createQuestionForUser(anotherUser.id(), firstQuestion);
 
-    AskedQuestion firstAskedQuestion = AskedQuestionFactory.create(userQuestion, false, 20);
-    AskedQuestion secondAskedQuestion = AskedQuestionFactory.create(anotherUserQuestion, false, 20);
+    AskedQuestion firstAskedQuestion =
+        AskedQuestionFactory.create(userQuestion, false, 20, 1);
+
+    AskedQuestion secondAskedQuestion =
+        AskedQuestionFactory.create(anotherUserQuestion, false, 20, 1);
 
 
     testEntityManager.persistAndFlush(firstAskedQuestion);

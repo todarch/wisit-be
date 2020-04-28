@@ -7,4 +7,5 @@ public class UserQuestionAnsweredEvent implements WisitEvent {
   private String userQuestionId;
   private long answeredInSeconds;
   private boolean knew;
+  private int scoreDelta;
 }

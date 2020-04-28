@@ -1,5 +1,6 @@
 package com.todarch.wisitbe.application.question;
 
+import com.todarch.wisitbe.application.leaderboard.ScoreCalculator;
 import com.todarch.wisitbe.application.location.LocationManager;
 import com.todarch.wisitbe.domain.picture.Picture;
 import com.todarch.wisitbe.domain.picture.PictureRepository;
@@ -35,6 +36,8 @@ public class QuestionManager {
   private final WisitEventPublisher wisitEventPublisher;
 
   private final AskedQuestionRepository askedQuestionRepository;
+
+  private final ScoreCalculator scoreCalculator;
 
   /**
    * Creates a question from a picture.
@@ -95,10 +98,14 @@ public class QuestionManager {
   }
 
   QuestionAnswer toQuestionAnswer(Question question, long givenCityId) {
+    boolean knew = question.isCorrectAnswer(givenCityId);
+    int scoreDelta = scoreCalculator.calculate(knew);
+
     QuestionAnswer questionAnswer = new QuestionAnswer();
     questionAnswer.setCorrectCity(locationManager.getCityById(question.answerCityId()));
     questionAnswer.setGivenCity(locationManager.getCityById(givenCityId));
-    questionAnswer.setKnew(question.isCorrectAnswer(givenCityId));
+    questionAnswer.setKnew(knew);
+    questionAnswer.setScoreDelta(scoreDelta);
     return questionAnswer;
   }
 }

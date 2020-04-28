@@ -8,4 +8,5 @@ public class QuestionAnswer {
   private City correctCity;
   private City givenCity;
   private boolean knew;
+  private int scoreDelta;
 }
