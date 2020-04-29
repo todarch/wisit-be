@@ -1,6 +1,6 @@
 package com.todarch.wisitbe.rest.question;
 
-import com.todarch.wisitbe.domain.location.City;
+import com.todarch.wisitbe.application.question.Choice;
 import java.time.LocalDateTime;
 import java.util.Set;
 import lombok.Data;
@@ -9,7 +9,7 @@ import lombok.Data;
 public class PreparedQuestion {
   private String questionId;
   private String picUrl;
-  private Set<City> choices;
+  private Set<Choice> choices;
   private LocalDateTime createdAt;
   private long answeredCount;
 }

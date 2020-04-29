@@ -1,5 +1,6 @@
 package com.todarch.wisitbe.application.location;
 
+import com.todarch.wisitbe.application.question.Choice;
 import com.todarch.wisitbe.domain.location.City;
 import com.todarch.wisitbe.domain.location.CityRepository;
 import com.todarch.wisitbe.domain.location.Country;
@@ -11,9 +12,11 @@ import com.todarch.wisitbe.rest.location.CityDetail;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,16 @@ public class LocationManager {
   private final CountryRepository countryRepository;
 
   private final PictureRepository pictureRepository;
+
+  private Map<Long, String> countryByIdMap;
+
+  @PostConstruct
+  private void loadCountries() {
+    countryByIdMap =
+        countryRepository.findAllByOrderByName()
+            .stream()
+            .collect(Collectors.toUnmodifiableMap(Country::getId, Country::getName));
+  }
 
   /**
    * Prepares other choices to be used with correct answer.
@@ -73,6 +86,24 @@ public class LocationManager {
     return cityIds.stream()
         .map(this::getCityById)
         .collect(Collectors.toSet());
+  }
+
+  /**
+   * Converts city ids to choices.
+   */
+  public Set<Choice> toChoices(Set<Long> cityIds) {
+    return cityIds.stream()
+        .map(this::getCityById)
+        .map(this::toChoice)
+        .collect(Collectors.toSet());
+  }
+
+  private Choice toChoice(City city) {
+    return new Choice(city.getId(), city.getName(), countryByIdMap.get(city.getCountryId()));
+  }
+
+  public Choice toChoice(long cityId) {
+    return toChoice(getCityById(cityId));
   }
 
   public List<Country> countries() {

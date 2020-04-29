@@ -1,5 +1,7 @@
 package com.todarch.wisitbe.application.question;
 
+import static java.util.Objects.requireNonNull;
+
 import com.todarch.wisitbe.application.location.LocationManager;
 import com.todarch.wisitbe.domain.question.Question;
 import com.todarch.wisitbe.domain.question.QuestionRepository;
@@ -13,6 +15,7 @@ import com.todarch.wisitbe.infrastructure.messaging.event.AlmostAllUserQuestions
 import com.todarch.wisitbe.infrastructure.messaging.event.UserQuestionAnsweredEvent;
 import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
 import com.todarch.wisitbe.infrastructure.provider.TimeProvider;
+import com.todarch.wisitbe.rest.question.AnswerQuestion;
 import com.todarch.wisitbe.rest.question.AnswerUserQuestion;
 import com.todarch.wisitbe.rest.question.PreparedQuestion;
 import com.todarch.wisitbe.rest.question.PreparedUserQuestion;
@@ -20,7 +23,6 @@ import com.todarch.wisitbe.rest.question.QuestionAnswer;
 import com.todarch.wisitbe.rest.question.UserQuestionAnswer;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -135,18 +137,18 @@ public class UserQuestionManager {
   public UserQuestionAnswer answer(@NonNull String userId,
                                    @NonNull AnswerUserQuestion answerUserQuestion) {
     String userQuestionId = answerUserQuestion.getUserQuestionId();
-    Objects.requireNonNull(userQuestionId, "UserQuestionId is required");
+    requireNonNull(userQuestionId, "UserQuestionId is required");
+    AnswerQuestion answerQuestion =
+        requireNonNull(answerUserQuestion.getAnswerQuestion(), "AnswerQuestion is required");
 
     UserQuestion userQuestion = userQuestionRepository.getByIdAndUserId(userQuestionId, userId);
 
-    final boolean knew = userQuestion.answer(answerUserQuestion.getCityId());
+    final boolean knew = userQuestion.answer(answerQuestion.getCityId());
 
     userQuestionRepository.save(userQuestion);
 
     QuestionAnswer questionAnswer =
-        questionManager.toQuestionAnswer(
-            userQuestion.getQuestion(),
-            answerUserQuestion.getCityId());
+        questionManager.toQuestionAnswer(userQuestion.getQuestion(), answerQuestion);
 
     UserQuestionAnswer userQuestionAnswer = new UserQuestionAnswer();
     userQuestionAnswer.setUserQuestionId(userQuestion.getId());
@@ -155,7 +157,7 @@ public class UserQuestionManager {
     UserQuestionAnsweredEvent userQuestionAnsweredEvent = new UserQuestionAnsweredEvent();
     userQuestionAnsweredEvent.setKnew(knew);
     userQuestionAnsweredEvent.setUserQuestionId(userQuestionAnswer.getUserQuestionId());
-    userQuestionAnsweredEvent.setAnsweredInSeconds(answerUserQuestion.getAnsweredInSeconds());
+    userQuestionAnsweredEvent.setAnsweredInSeconds(answerQuestion.getAnsweredInSeconds());
     userQuestionAnsweredEvent.setScoreDelta(questionAnswer.getScoreDelta());
     wisitEventPublisher.publishEvent(userQuestionAnsweredEvent);
 

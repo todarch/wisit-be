@@ -70,7 +70,7 @@ public class QuestionManager {
     preparedQuestion.setQuestionId(question.getId());
     preparedQuestion.setPicUrl(question.pictureUrl());
     preparedQuestion.setCreatedAt(question.createdAt());
-    preparedQuestion.setChoices(locationManager.toCities(question.choices()));
+    preparedQuestion.setChoices(locationManager.toChoices(question.choices()));
     preparedQuestion.setAnsweredCount(answeredCount(question.getId()));
     return preparedQuestion;
   }
@@ -94,16 +94,16 @@ public class QuestionManager {
 
   public QuestionAnswer answer(@NonNull AnswerQuestion answer) {
     Question question = questionRepository.getById(answer.getQuestionId());
-    return toQuestionAnswer(question, answer.getCityId());
+    return toQuestionAnswer(question, answer);
   }
 
-  QuestionAnswer toQuestionAnswer(Question question, long givenCityId) {
-    boolean knew = question.isCorrectAnswer(givenCityId);
-    int scoreDelta = scoreCalculator.calculate(knew);
+  QuestionAnswer toQuestionAnswer(Question question, AnswerQuestion answerQuestion) {
+    boolean knew = question.isCorrectAnswer(answerQuestion.getCityId());
+    int scoreDelta = scoreCalculator.calculate(knew, answerQuestion.getQuestionType());
 
     QuestionAnswer questionAnswer = new QuestionAnswer();
-    questionAnswer.setCorrectCity(locationManager.getCityById(question.answerCityId()));
-    questionAnswer.setGivenCity(locationManager.getCityById(givenCityId));
+    questionAnswer.setCorrectChoice(locationManager.toChoice(question.answerCityId()));
+    questionAnswer.setGivenChoice(locationManager.toChoice(answerQuestion.getCityId()));
     questionAnswer.setKnew(knew);
     questionAnswer.setScoreDelta(scoreDelta);
     return questionAnswer;

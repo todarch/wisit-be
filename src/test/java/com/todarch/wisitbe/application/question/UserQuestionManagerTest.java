@@ -5,10 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 
-import com.todarch.wisitbe.application.leaderboard.ScoreCalculator;
-import com.todarch.wisitbe.application.location.LocationManager;
 import com.todarch.wisitbe.data.QuestionData;
 import com.todarch.wisitbe.data.UserData;
 import com.todarch.wisitbe.data.UserQuestionData;
@@ -23,17 +20,16 @@ import com.todarch.wisitbe.infrastructure.messaging.event.AlmostAllUserQuestions
 import com.todarch.wisitbe.infrastructure.messaging.event.UserQuestionAnsweredEvent;
 import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
 import com.todarch.wisitbe.infrastructure.provider.TimeProvider;
+import com.todarch.wisitbe.rest.question.AnswerQuestion;
 import com.todarch.wisitbe.rest.question.AnswerUserQuestion;
 import com.todarch.wisitbe.rest.question.PreparedUserQuestion;
 import com.todarch.wisitbe.rest.question.QuestionAnswer;
-import com.todarch.wisitbe.rest.question.UserQuestionAnswer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -250,9 +246,13 @@ class UserQuestionManagerTest {
       User testUser = UserData.newUser();
       UserQuestion userQuestion = UserQuestionData.newUserQuestionFor(testUser);
 
+      AnswerQuestion answerQuestion = new AnswerQuestion();
+      answerQuestion.setCityId(5L);
+      answerQuestion.setAnsweredInSeconds(Long.MAX_VALUE);
+
       AnswerUserQuestion answerUserQuestion = new AnswerUserQuestion();
       answerUserQuestion.setUserQuestionId(userQuestion.getId());
-      answerUserQuestion.setCityId(5L);
+      answerUserQuestion.setAnswerQuestion(answerQuestion);
 
       doReturn(userQuestion)
           .when(userQuestionRepository).getByIdAndUserId(userQuestion.getId(), testUser.id());
@@ -261,7 +261,7 @@ class UserQuestionManagerTest {
       questionAnswer.setScoreDelta(-999);
 
       doReturn(questionAnswer).when(questionManager)
-          .toQuestionAnswer(userQuestion.getQuestion(), answerUserQuestion.getCityId());
+          .toQuestionAnswer(userQuestion.getQuestion(), answerQuestion);
 
       userQuestionManager.answer(testUser.id(), answerUserQuestion);
 
@@ -276,16 +276,19 @@ class UserQuestionManagerTest {
       doReturn(userQuestion)
           .when(userQuestionRepository).getByIdAndUserId(userQuestion.getId(), testUser.id());
 
+      AnswerQuestion answerQuestion = new AnswerQuestion();
+      answerQuestion.setCityId(5L);
+      answerQuestion.setAnsweredInSeconds(Long.MAX_VALUE);
+
       AnswerUserQuestion answerUserQuestion = new AnswerUserQuestion();
       answerUserQuestion.setUserQuestionId(userQuestion.getId());
-      answerUserQuestion.setCityId(5L);
-      answerUserQuestion.setAnsweredInSeconds(Long.MAX_VALUE);
+      answerUserQuestion.setAnswerQuestion(answerQuestion);
 
       QuestionAnswer questionAnswer = new QuestionAnswer();
       questionAnswer.setScoreDelta(-999);
 
       doReturn(questionAnswer).when(questionManager)
-          .toQuestionAnswer(userQuestion.getQuestion(), answerUserQuestion.getCityId());
+          .toQuestionAnswer(userQuestion.getQuestion(), answerQuestion);
 
       userQuestionManager.answer(testUser.id(), answerUserQuestion);
 
@@ -300,7 +303,7 @@ class UserQuestionManagerTest {
       assertThat(publishedEvent.getScoreDelta()).isEqualTo(questionAnswer.getScoreDelta());
 
       assertThat(publishedEvent.getAnsweredInSeconds())
-          .isEqualTo(answerUserQuestion.getAnsweredInSeconds());
+          .isEqualTo(answerQuestion.getAnsweredInSeconds());
 
       assertThat(publishedEvent.getUserQuestionId())
           .isEqualTo(answerUserQuestion.getUserQuestionId());
