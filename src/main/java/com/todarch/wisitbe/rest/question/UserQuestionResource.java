@@ -38,7 +38,17 @@ public class UserQuestionResource {
     UserQuestionAnswer userQuestionAnswer =
         userQuestionManager.answer(currentUser.id(), answer);
 
+    removeAskedQuestionFromCache(currentUser.username());
+
     return ResponseEntity.ok(userQuestionAnswer);
+  }
+
+  private void removeAskedQuestionFromCache(String username) {
+    List<PreparedUserQuestion> nextQuestions =
+        cachedUserQuestions.get(username);
+    if (!nextQuestions.isEmpty()) {
+      nextQuestions.remove(0);
+    }
   }
 
   /**
@@ -61,7 +71,7 @@ public class UserQuestionResource {
       return ResponseEntity.notFound().build();
     }
 
-    PreparedUserQuestion nextQuestion = nextQuestions.remove(0);
+    PreparedUserQuestion nextQuestion = nextQuestions.get(0);
     return ResponseEntity.ok(nextQuestion);
   }
 
