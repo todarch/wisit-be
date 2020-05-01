@@ -125,11 +125,11 @@ public class Question {
     this.picture.inactivate();
   }
 
-  public boolean isNotActive() {
-    return !isActive();
+  public boolean inactive() {
+    return !active();
   }
 
-  public boolean isActive() {
+  public boolean active() {
     return this.active;
   }
 }

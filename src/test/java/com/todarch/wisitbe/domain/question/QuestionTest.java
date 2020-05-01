@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import com.todarch.wisitbe.domain.picture.Picture;
-import com.todarch.wisitbe.domain.question.Question;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -98,6 +97,6 @@ class QuestionTest {
   void questionIsCreatedActiveByDefault() {
     Question question = validQuestion();
 
-    assertThat(question.isActive()).isTrue();
+    assertThat(question.active()).isTrue();
   }
 }
