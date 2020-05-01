@@ -15,6 +15,7 @@ import com.todarch.wisitbe.infrastructure.messaging.event.AlmostAllUserQuestions
 import com.todarch.wisitbe.infrastructure.messaging.event.UserQuestionAnsweredEvent;
 import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
 import com.todarch.wisitbe.infrastructure.provider.TimeProvider;
+import com.todarch.wisitbe.infrastructure.rest.errorhandling.ResourceNotFoundException;
 import com.todarch.wisitbe.rest.question.AnswerQuestion;
 import com.todarch.wisitbe.rest.question.AnswerUserQuestion;
 import com.todarch.wisitbe.rest.question.PreparedQuestion;
@@ -129,10 +130,11 @@ public class UserQuestionManager {
 
   /**
    * A user answers one of their question.
-   * //TODO: handle the case if user answers a reported/removed user question
+   *
    * @param userId who is answering the question
    * @param answerUserQuestion which question is being answered
    * @return the given answer and correct answer
+   * @throws ResourceNotFoundException when a user question already reported/removed
    */
   public UserQuestionAnswer answer(@NonNull String userId,
                                    @NonNull AnswerUserQuestion answerUserQuestion) {

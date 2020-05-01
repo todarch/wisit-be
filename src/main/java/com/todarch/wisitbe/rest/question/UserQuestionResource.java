@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -25,6 +26,9 @@ public class UserQuestionResource {
 
   private final UserQuestionManager userQuestionManager;
 
+  //TODO: possibly this cache will contain reported question
+  // for now, user will be informed when answering such questions
+  // aim not to ask reported questions to user in the first place
   private final Map<String, List<PreparedUserQuestion>> cachedUserQuestions =
       new ConcurrentHashMap<>();
 
@@ -38,15 +42,14 @@ public class UserQuestionResource {
     UserQuestionAnswer userQuestionAnswer =
         userQuestionManager.answer(currentUser.id(), answer);
 
-    removeAskedQuestionFromCache(currentUser.username());
+    removeAskedOrReportedQuestionFromCache(currentUser.username());
 
     return ResponseEntity.ok(userQuestionAnswer);
   }
 
-  private void removeAskedQuestionFromCache(String username) {
-    List<PreparedUserQuestion> nextQuestions =
-        cachedUserQuestions.get(username);
-    if (!nextQuestions.isEmpty()) {
+  private void removeAskedOrReportedQuestionFromCache(String username) {
+    List<PreparedUserQuestion> nextQuestions = cachedUserQuestions.get(username);
+    if (!CollectionUtils.isEmpty(nextQuestions)) {
       nextQuestions.remove(0);
     }
   }
@@ -55,8 +58,13 @@ public class UserQuestionResource {
    * Returns the list of questions for the current user.
    */
   @GetMapping("/next")
-  public ResponseEntity<PreparedUserQuestion> nextUserQuestion() {
+  public ResponseEntity<PreparedUserQuestion> nextUserQuestion(
+      @RequestParam(required = false) boolean afterReporting) {
     CurrentUser currentUser = currentUserProvider.currentUser();
+
+    if (afterReporting) {
+      removeAskedOrReportedQuestionFromCache(currentUser.username());
+    }
 
     List<PreparedUserQuestion> nextQuestions =
         cachedUserQuestions.get(currentUser.username());
