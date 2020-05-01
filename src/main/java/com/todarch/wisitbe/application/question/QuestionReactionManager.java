@@ -27,7 +27,8 @@ public class QuestionReactionManager {
   }
 
   public void unlike(String userId, String questionId) {
-    //TODO
+    questionReactionRepository.findLikeByUserIdAndQuestionId(userId, questionId)
+        .ifPresent(questionReactionRepository::delete);
   }
 
   /**
@@ -45,7 +46,8 @@ public class QuestionReactionManager {
   }
 
   public void undislike(String userId, String questionId) {
-    //TODO
+    questionReactionRepository.findDislikeByUserIdAndQuestionId(userId, questionId)
+        .ifPresent(questionReactionRepository::delete);
   }
 
   /**

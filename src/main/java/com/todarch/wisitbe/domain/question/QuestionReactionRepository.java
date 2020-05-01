@@ -7,6 +7,19 @@ public interface QuestionReactionRepository extends JpaRepository<QuestionReacti
 
   Optional<QuestionReaction> findByUserIdAndQuestionId(String userId, String questionId);
 
+  Optional<QuestionReaction> findByUserIdAndQuestionIdAndLiked(String userId,
+                                                               String questionId,
+                                                               boolean liked);
+
+  default Optional<QuestionReaction> findLikeByUserIdAndQuestionId(String userId,
+                                                                      String questionId) {
+    return findByUserIdAndQuestionIdAndLiked(userId, questionId, true);
+  }
+
+  default Optional<QuestionReaction> findDislikeByUserIdAndQuestionId(String userId,
+                                                                      String questionId) {
+    return findByUserIdAndQuestionIdAndLiked(userId, questionId, false);
+  }
 
   default long countLikesByQuestionId(String questionId) {
     return countByLikedAndQuestionId(true, questionId);

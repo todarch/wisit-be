@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,7 +51,7 @@ public class QuestionReactionResource {
   /**
    * User unlikes a question.
    */
-  @PostMapping("/unlike/{questionId}")
+  @DeleteMapping("/unlike/{questionId}")
   public ResponseEntity<Void> unlike(@PathVariable String questionId) {
     CurrentUser currentUser = currentUserProvider.currentUser();
 
@@ -74,7 +75,7 @@ public class QuestionReactionResource {
   /**
    * User removes dislike question.
    */
-  @PostMapping("/undislike/{questionId}")
+  @DeleteMapping("/undislike/{questionId}")
   public ResponseEntity<Void> undislike(@PathVariable String questionId) {
     CurrentUser currentUser = currentUserProvider.currentUser();
 
