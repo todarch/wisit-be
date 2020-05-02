@@ -84,12 +84,24 @@ public class QuestionManager {
    */
   public Optional<PreparedQuestion> randomQuestion() {
     long qty = questionRepository.count();
-    int idx = ThreadLocalRandom.current().nextInt((int) qty);
-    Page<Question> questionPage = questionRepository.findAllActive(PageRequest.of(idx, 1));
-    return Optional.of(questionPage)
-        .filter(Page::hasContent)
-        .map(page -> page.getContent().get(0))
-        .map(this::toQuestionWithNoAnswer);
+
+    //TODO: fix this mess
+    int tryCount = 10;
+    while (tryCount != 0) {
+      int idx = ThreadLocalRandom.current().nextInt((int) qty);
+      Page<Question> questionPage = questionRepository.findAllActive(PageRequest.of(idx, 1));
+      Optional<PreparedQuestion> preparedQuestion =
+          Optional.of(questionPage)
+              .filter(Page::hasContent)
+              .map(page -> page.getContent().get(0))
+              .map(this::toQuestionWithNoAnswer);
+
+      if (preparedQuestion.isPresent()) {
+        return preparedQuestion;
+      }
+      tryCount--;
+    }
+    return Optional.empty();
   }
 
   public QuestionAnswer answer(@NonNull AnswerQuestion answer) {
