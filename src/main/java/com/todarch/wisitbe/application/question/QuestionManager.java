@@ -85,7 +85,7 @@ public class QuestionManager {
   public Optional<PreparedQuestion> randomQuestion() {
     long qty = questionRepository.count();
     int idx = ThreadLocalRandom.current().nextInt((int) qty);
-    Page<Question> questionPage = questionRepository.findAll(PageRequest.of(idx, 1));
+    Page<Question> questionPage = questionRepository.findAllActive(PageRequest.of(idx, 1));
     return Optional.of(questionPage)
         .filter(Page::hasContent)
         .map(page -> page.getContent().get(0))

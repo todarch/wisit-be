@@ -3,6 +3,8 @@ package com.todarch.wisitbe.domain.question;
 import com.todarch.wisitbe.infrastructure.rest.errorhandling.ResourceNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface QuestionRepository extends JpaRepository<Question, String> {
@@ -18,11 +20,11 @@ public interface QuestionRepository extends JpaRepository<Question, String> {
     return findById(id).orElseThrow(() -> new ResourceNotFoundException("Question not found"));
   }
 
-  default List<Question> findAllActive() {
-    return findAllByActive(true);
+  default Page<Question> findAllActive(Pageable pageable) {
+    return findAllByActive(true, pageable);
   }
 
-  List<Question> findAllByActive(boolean active);
+  Page<Question> findAllByActive(boolean active, Pageable pageable);
 
   default Question getById(String id) {
     return findById(id).orElseThrow(() -> new ResourceNotFoundException("Question not found"));
