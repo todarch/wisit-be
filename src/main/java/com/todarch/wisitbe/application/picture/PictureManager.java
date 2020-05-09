@@ -8,7 +8,9 @@ import com.todarch.wisitbe.infrastructure.messaging.event.PictureCreatedEvent;
 import com.todarch.wisitbe.infrastructure.messaging.publisher.WisitEventPublisher;
 import com.todarch.wisitbe.infrastructure.rest.errorhandling.InvalidInputException;
 import com.todarch.wisitbe.rest.picture.NewPictureReq;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -53,5 +55,23 @@ public class PictureManager {
 
   public Optional<Picture> getById(long id) {
     return pictureRepository.findById(id);
+  }
+
+  /**
+   * Maps picture id to picture details in batch.
+   */
+  public List<DetailedPicture> pictures(List<Long> pictureIds) {
+    return pictureRepository.findAllById(pictureIds)
+        .stream()
+        .map(this::toDetailedPicture)
+        .collect(Collectors.toList());
+  }
+
+  private DetailedPicture toDetailedPicture(Picture picture) {
+    DetailedPicture detailedPicture = new DetailedPicture();
+    detailedPicture.setPicId(picture.getId());
+    detailedPicture.setPicUrl(picture.getUrl());
+    detailedPicture.setCityName(locationManager.toCityName(picture.getCityId()));
+    return detailedPicture;
   }
 }

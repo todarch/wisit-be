@@ -68,6 +68,7 @@ public class QuestionManager {
   PreparedQuestion toQuestionWithNoAnswer(Question question) {
     PreparedQuestion preparedQuestion = new PreparedQuestion();
     preparedQuestion.setQuestionId(question.getId());
+    preparedQuestion.setPicId(question.pictureId());
     preparedQuestion.setPicUrl(question.pictureUrl());
     preparedQuestion.setCreatedAt(question.createdAt());
     preparedQuestion.setChoices(locationManager.toChoices(question.choices()));

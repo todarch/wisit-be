@@ -34,12 +34,19 @@ public class LocationManager {
 
   private Map<Long, String> countryByIdMap;
 
+  private Map<Long, String> cityByIdMap;
+
   @PostConstruct
   private void loadCountries() {
     countryByIdMap =
         countryRepository.findAllByOrderByName()
             .stream()
             .collect(Collectors.toUnmodifiableMap(Country::getId, Country::getName));
+
+    cityByIdMap =
+        cityRepository.findAllByOrderByName()
+            .stream()
+            .collect(Collectors.toUnmodifiableMap(City::getId, City::getName));
   }
 
   /**
@@ -144,5 +151,9 @@ public class LocationManager {
     City newCity = country.addCity(formattedCityName);
 
     cityRepository.save(newCity);
+  }
+
+  public String toCityName(long cityId) {
+    return cityByIdMap.get(cityId);
   }
 }

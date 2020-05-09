@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 public class PreparedQuestion {
   private String questionId;
+  private long picId;
   private String picUrl;
   private Set<Choice> choices;
   private LocalDateTime createdAt;

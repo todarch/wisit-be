@@ -132,4 +132,8 @@ public class Question {
   public boolean active() {
     return this.active;
   }
+
+  public long pictureId() {
+    return this.picture.getId();
+  }
 }
